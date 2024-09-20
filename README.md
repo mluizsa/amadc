@@ -40,7 +40,9 @@ O sistema oferece uma plataforma para gerenciar o cadastro de animais resgatados
 
 - **Java 23**
 - **Node.js** (para o front-end Angular)
+- **Intellij Community** (Usado para desenvolvimento)
 - **MySQL** (para o banco de dados)
+- **Debeaver** (Utilizado para manuseo do banco de dados)
 - **Maven** (para gerenciamento de dependências)
 - **GitHub** (para controle de versão)
 
