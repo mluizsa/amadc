@@ -1,0 +1,48 @@
+package com.ong.amadc.service;
+
+import com.ong.amadc.config.infra.security.TokenService;
+import com.ong.amadc.domain.model.Usuario;
+import com.ong.amadc.dto.LoginRequestDTO;
+import com.ong.amadc.dto.TokenResponseDTO;
+import com.ong.amadc.dto.UsuarioDetalhesDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    @Lazy
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenService tokenService;
+
+    public TokenResponseDTO autenticar(LoginRequestDTO data) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
+        var auth = this.authenticationManager.authenticate(usernamePassword);
+
+        var token = tokenService.generateToken((Usuario) auth.getPrincipal());
+        return new TokenResponseDTO(token);
+    }
+
+    public UsuarioDetalhesDTO obterDadosUsuarioLogado(Authentication auth) {
+        Usuario user = (Usuario) auth.getPrincipal();
+
+        var permissoes = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        return new UsuarioDetalhesDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                permissoes
+        );
+    }
+}
