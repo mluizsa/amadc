@@ -18,7 +18,14 @@ spring:
     locations: classpath:db/migration
   logging:
     level:
-      org.springframework.security: DEBUG
+      org.springframework.security: WARN
+      root: INFO
+      org.hibernate.orm.connections.pooling: ERROR
+      org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl: WARN
+      org.hibernate.orm.connections.access: WARN
+      org.hibernate: WARN
+      com.zaxxer.hikari: WARN
+      org.hibernate.tool.schema: WARN
 
 # ESTE BLOCO DEVE FICAR NA RAIZ (FORA DO BLOCO SPRING)
 api:
