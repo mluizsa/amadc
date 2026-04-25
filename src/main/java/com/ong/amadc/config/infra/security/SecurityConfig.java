@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,6 +36,20 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         // Libera Swagger e Documentação
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        //FrontEnd
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/favicon.ico",
+                                "/static/**",
+                                "/css/**",
+                                "/js/**",
+                                "/img/**",
+                                "/**/*.js",
+                                "/**/*.css",
+                                "/**/*.png",
+                                "/**/*.jpg"
+                        ).permitAll()
 
                         // Garante que o pre-flight do CORS não seja barrado (opcional, mas recomendado)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -43,6 +58,7 @@ public class SecurityConfig {
                 )
                 // O filtro customizado deve vir antes do filtro de Username/Password
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(Customizer.withDefaults())
                 .build();
     }
 
