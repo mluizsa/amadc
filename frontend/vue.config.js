@@ -8,18 +8,21 @@ function resolveSrc(_path) {
 module.exports = {
   lintOnSave: false,
   devServer: {
+    port: 8081,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
+        changeOrigin: true,
+        logLevel: 'debug'
       }
     }
   },
   configureWebpack: {
     resolve: {
       alias: {
+        // Permite usar 'src/components/...' nos imports
         src: resolveSrc('src'),
-        'chart.js': 'chart.js/dist/Chart.js'
+        '@': resolveSrc('src')
       }
     },
     plugins: [
@@ -29,14 +32,13 @@ module.exports = {
     ]
   },
   pwa: {
-    name: 'Vue Light Bootstrap Dashboard',
-    themeColor: '#344675',
-    msTileColor: '#344675',
+    name: 'AMA DC - Gestão',
+    themeColor: '#1DC7EA',
+    msTileColor: '#1DC7EA',
     appleMobileWebAppCapable: 'yes',
-    appleMobileWebAppStatusBarStyle: '#344675'
+    appleMobileWebAppStatusBarStyle: 'black'
   },
   css: {
-    // Enable CSS source maps.
     sourceMap: process.env.NODE_ENV !== 'production'
   }
 };

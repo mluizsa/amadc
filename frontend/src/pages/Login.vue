@@ -1,45 +1,111 @@
 <template>
-  <div class="container-fluid" style="height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #eee;">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header">
-          <h4 class="card-title">Login - AMA DC</h4>
-        </div>
-        <div class="card-body">
-          <form @submit.prevent="handleLogin">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Usuário</label>
-                  <input type="text" 
-                         class="form-control" 
-                         placeholder="Seu login" 
-                         v-model="user.username">
-                </div>
+  <div class="login-page">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-5 col-sm-8">
+          <div class="card login-card shadow-lg">
+            <div class="card-header text-center">
+              <div class="logo-container mb-3">
+                <img src="../assets/img/logo.jpg" style="width: 120px;" alt="Logo AMA DC">
               </div>
+              <h3 class="card-title mt-0">AMA DC</h3>
+              <p class="card-category">Gestão de Resgates e Adoções</p>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="form-group">
-                  <label>Senha</label>
+            <hr>
+            <div class="card-body">
+              <form @submit.prevent="handleLogin">
+                <div class="form-group mb-3">
+                  <label class="text-uppercase small font-weight-bold">Usuário</label>
+                  <div class="input-group">
+                    <input type="text" 
+                           class="form-control" 
+                           placeholder="Ex: administrador" 
+                           v-model="user.username"
+                           required>
+                  </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                  <label class="text-uppercase small font-weight-bold">Senha</label>
                   <input type="password" 
                          class="form-control" 
-                         placeholder="Sua senha" 
-                         v-model="user.password">
+                         placeholder="••••••••" 
+                         v-model="user.password"
+                         required>
                 </div>
-              </div>
+
+                <div class="text-center">
+                  <button type="submit" class="btn btn-info btn-fill btn-block btn-lg">
+                    ACESSAR SISTEMA
+                  </button>
+                </div>
+              </form>
             </div>
-            <div class="text-center">
-              <button type="submit" class="btn btn-info btn-fill btn-wd">
-                Entrar
-              </button>
+            <div class="card-footer text-center pb-4">
+              <small class="text-muted">&copy; 2026 Associação Amigos dos Animais</small>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.login-page {
+  /* Gradiente moderno que combina com o template Light Bootstrap */
+  background: linear-gradient(135deg, #1DC7EA 0%, #4091ff 100%);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.login-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.card-title {
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.logo-icon {
+  font-size: 48px;
+  color: #1DC7EA;
+}
+
+.form-control {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  background-color: #fff;
+  border-color: #1DC7EA;
+  box-shadow: 0 0 8px rgba(29, 199, 234, 0.2);
+}
+
+.btn-fill {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: transform 0.2s;
+}
+
+.btn-fill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-category {
+  color: #888;
+  font-size: 0.9rem;
+}
+</style>
 
 <script>
 import AuthService from '../services/AuthService';
