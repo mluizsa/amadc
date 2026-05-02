@@ -44,16 +44,8 @@ const router = new VueRouter({
 
 // --- TRAVA DE SEGURANÇA (Navigation Guard) ---
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('user_token');
-  
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!token) {
-      next('/login');
-    } else {
-      next();
-    }
-  } else if (to.path === '/login' && token) {
-    next('/admin/overview');
+    next();
   } else {
     next();
   }

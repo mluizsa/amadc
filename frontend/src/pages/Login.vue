@@ -114,7 +114,6 @@ export default {
   name: 'Login',
   data() {
     return {
-      // O objeto user PRECISA estar aqui dentro para ser reativo
       user: {
         username: '',
         password: ''
@@ -123,17 +122,23 @@ export default {
   },
   methods: {
     handleLogin() {
-      console.log("Tentando logar com:", this.user.username); // Para debugar no console
+    console.log("Iniciando processo de login...");
+  
+  AuthService.login(this.user)
+    .then((response) => {
+      console.log("Login bem-sucedido no servidor!");
       
-      AuthService.login(this.user)
-        .then(() => {
-          this.$router.push('/admin/overview');
-        })
-        .catch(error => {
-          console.error(error);
-          alert("Erro no login: " + (error.response && error.response.data ? error.response.data : "Verifique sua conexão"));
-        });
-    }
+      this.$router.push('/admin/overview');
+    })
+    .catch(error => {
+      console.error("Erro real no login:", error);
+      
+      if (error.message && error.message.includes('undefined')) return;
+
+      const msg = error.response && error.response.data ? error.response.data : "Credenciais inválidas";
+      alert("Erro no login: " + msg);
+    });
+  }
   }
 };
 </script>
