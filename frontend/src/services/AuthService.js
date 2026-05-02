@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = '/api/auth/'; // O proxy redireciona para localhost:8080
+const API_URL = '/api/auth/';
+
+// Configura o Axios para SEMPRE enviar cookies nas requisições
+axios.defaults.withCredentials = true;
 
 class AuthService {
   login(user) {
@@ -10,20 +13,16 @@ class AuthService {
         password: user.password
       })
       .then(response => {
-        if (response.data.token) {
-          localStorage.setItem('user_token', response.data.token);
-        }
         return response.data;
       });
   }
 
   logout() {
-    localStorage.removeItem('user_token');
+    return axios.post(API_URL + 'logout').then(() => {
+        console.log("Sessão encerrada");
+    });
   }
 
-  getToken() {
-    return localStorage.getItem('user_token');
-  }
 }
 
 export default new AuthService();

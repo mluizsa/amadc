@@ -16,16 +16,20 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-  logging:
-    level:
-      org.springframework.security: WARN
-      root: INFO
-      org.hibernate.orm.connections.pooling: ERROR
-      org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl: WARN
-      org.hibernate.orm.connections.access: WARN
-      org.hibernate: WARN
-      com.zaxxer.hikari: WARN
-      org.hibernate.tool.schema: WARN
+logging:
+  level:
+    root: INFO
+      # Silencia o bloco azul HHH10001005 (Informações da Database)
+    org.hibernate.orm.connections.pooling: WARN
+    # Silencia outros logs de inicialização verbosos do Hibernate
+    org.hibernate.engine.jdbc.connections.internal: WARN
+    org.hibernate.orm.connections.access: WARN
+    org.hibernate.dialect: WARN
+    # Reduz o ruído do Flyway e do pool Hikari
+    org.flywaydb: WARN
+    com.zaxxer.hikari: WARN
+    # Mantém o Spring Security em WARN como você já tem
+    org.springframework.security: WARN
 
 # ESTE BLOCO DEVE FICAR NA RAIZ (FORA DO BLOCO SPRING)
 api:
