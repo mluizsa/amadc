@@ -27,6 +27,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
@@ -51,14 +52,11 @@ public class SecurityConfig {
                                 "/**/*.jpg"
                         ).permitAll()
 
-                        // Garante que o pre-flight do CORS não seja barrado (opcional, mas recomendado)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
-                // O filtro customizado deve vir antes do filtro de Username/Password
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(Customizer.withDefaults())
                 .build();
     }
 
