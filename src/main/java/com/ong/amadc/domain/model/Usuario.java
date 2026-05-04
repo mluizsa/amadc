@@ -1,5 +1,6 @@
 package com.ong.amadc.domain.model;
 
+import com.ong.amadc.config.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario implements UserDetails {
+public class Usuario extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +25,7 @@ public class Usuario implements UserDetails {
     private Long id;
 
     @Column(name = "usu_username", nullable = false, unique = true)
-    private String username; // Nome do atributo na classe
+    private String username;
 
     @Column(name = "usu_password", nullable = false)
     private String password;
@@ -51,16 +52,6 @@ public class Usuario implements UserDetails {
                 .collect(Collectors.toSet());
     }
 
-    // CORREÇÃO: O retorno deve ser o atributo 'username' definido acima
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
 
     @Override
     public boolean isAccountNonExpired() { return true; }

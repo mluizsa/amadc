@@ -1,5 +1,6 @@
 package com.ong.amadc.domain.model;
 
+import com.ong.amadc.config.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Perfil {
+public class Perfil extends BaseEntity {
 
     @Id
     @Column(name = "perf_id")
