@@ -25,7 +25,7 @@ Sistema centralizado desenvolvido para a **AMA DC** (Associação Amigos dos Ani
 
 ### **Back-end**
 *   **JDK:** 21 (OpenJDK)
-*   **Framework:** Spring Boot 3.x
+*   **Framework:** Spring Boot 4.x
 *   **Segurança:** Spring Security + Stateless JWT com Cookies
 *   **Banco de Dados:** PostgreSQL
 *   **Migrações:** Flyway (Versionamento de banco de dados)
