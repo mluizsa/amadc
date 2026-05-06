@@ -1,17 +1,17 @@
 package com.ong.amadc.domain.repository;
 
-import com.ong.amadc.domain.model.Voluntario;
+import com.ong.amadc.domain.model.VoluntarioEntidade;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface VoluntarioRepository extends JpaRepository<Voluntario, Long> {
+public interface VoluntarioRepository extends JpaRepository<VoluntarioEntidade, Long> {
 
-    Optional<Voluntario> findByCpf(String cpf);
+    Optional<VoluntarioEntidade> findByCpf(String cpf);
 
-    Optional<Voluntario> findByEmail(String email);
+    Optional<VoluntarioEntidade> findByEmail(String email);
 
     boolean existsByCpf(String cpf);
 }
