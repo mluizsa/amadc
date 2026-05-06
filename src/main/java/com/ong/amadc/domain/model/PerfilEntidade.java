@@ -12,7 +12,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Perfil extends BaseEntity {
+public class PerfilEntidade extends BaseEntity {
 
     @Id
     @Column(name = "perf_id")
@@ -27,5 +27,5 @@ public class Perfil extends BaseEntity {
             joinColumns = @JoinColumn(name = "perf_id"),
             inverseJoinColumns = @JoinColumn(name = "perm_id")
     )
-    private Set<Permissao> permissoes;
+    private Set<PermissaoEntidade> permissoes;
 }

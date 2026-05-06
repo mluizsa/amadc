@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.ong.amadc.domain.model.Usuario;
+import com.ong.amadc.domain.model.UsuarioEntidade;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class TokenService {
 
     private static final String ISSUER = "amadc-api";
 
-    public String generateToken(Usuario usuario) {
+    public String generateToken(UsuarioEntidade usuario) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
