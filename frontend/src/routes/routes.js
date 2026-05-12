@@ -25,23 +25,27 @@ const routes = [
     children: [
       {
         path: 'overview',
-        name: 'Overview',
-        component: Overview
+        name: 'Dashboard',
+        component: Overview,
+        meta: { icon: 'nc-icon nc-chart-pie-35' }
       },
       {
-        path: 'user',
-        name: 'Usuário',
-        component: UserProfile
+        path: 'voluntarios',
+        name: 'Voluntários',
+        component: TableList, // Usaremos a TableList como base
+        meta: {
+          icon: 'nc-icon nc-address-card',
+          permission: 'VOLUNTARIO_READ'
+        }
       },
       {
         path: 'animais',
         name: 'Animais',
-        component: TableList
-      },
-      {
-        path: 'notifications',
-        name: 'Notificações',
-        component: Notifications
+        component: TableList,
+        meta: {
+          icon: 'nc-icon nc-prowler',
+          permission: 'ANIMAL_READ'
+        }
       }
     ]
   },

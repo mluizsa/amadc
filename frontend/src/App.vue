@@ -6,7 +6,27 @@
 </template>
 
 <script>
-  export default {}
+  import routes from './routes/routes'; // Importe suas rotas
+
+  export default {
+    watch: {
+      // Sempre que mudar a rota, garantimos que o menu está sincronizado
+      // Útil caso o login aconteça e as permissões mudem
+      '$route': 'updateMenu'
+    },
+    methods: {
+      updateMenu() {
+        // Aqui você pegaria as permissões do seu Store (Pinia/Vuex) ou do localStorage
+        // Por enquanto, vamos passar um array com 'ADMIN' para testar se o menu aparece
+        const userPermissions = ['ADMIN', 'VOLUNTARIO_READ'];
+
+        this.$sidebar.setLinksFromRoutes(routes, userPermissions);
+      }
+    },
+    mounted() {
+      this.updateMenu();
+    }
+  }
 </script>
 <style lang="scss">
   .vue-notifyjs.notifications{

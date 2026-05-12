@@ -17,19 +17,19 @@
                 <div class="form-group mb-3">
                   <label class="text-uppercase small font-weight-bold">Usuário</label>
                   <div class="input-group">
-                    <input type="text" 
-                           class="form-control" 
-                           placeholder="Ex: administrador" 
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Ex: administrador"
                            v-model="user.username"
                            required>
                   </div>
                 </div>
-                
+
                 <div class="form-group mb-4">
                   <label class="text-uppercase small font-weight-bold">Senha</label>
-                  <input type="password" 
-                         class="form-control" 
-                         placeholder="••••••••" 
+                  <input type="password"
+                         class="form-control"
+                         placeholder="••••••••"
                          v-model="user.password"
                          required>
                 </div>
@@ -109,6 +109,7 @@
 
 <script>
 import AuthService from '../services/AuthService';
+import routes from '../routes/routes';
 
 export default {
   name: 'Login',
@@ -121,24 +122,25 @@ export default {
     };
   },
   methods: {
-    handleLogin() {
-    console.log("Iniciando processo de login...");
-  
-  AuthService.login(this.user)
-    .then((response) => {
-      console.log("Login bem-sucedido no servidor!");
-      
-      this.$router.push('/admin/overview');
-    })
-    .catch(error => {
-      console.error("Erro real no login:", error);
-      
-      if (error.message && error.message.includes('undefined')) return;
+    async handleLogin() {
+      try {
+        console.log("Iniciando processo de login...");
+        await AuthService.login(this.user);
 
-      const msg = error.response && error.response.data ? error.response.data : "Credenciais inválidas";
-      alert("Erro no login: " + msg);
-    });
-  }
+        // AGORA SIM buscamos os dados do usuário logado
+        const userData = await AuthService.getMe();
+
+        console.log("Permissões recebidas:", userData.permissoes);
+
+        // Popula o menu global
+        this.$sidebar.setLinksFromRoutes(routes, userData.permissoes);
+
+        this.$router.push('/admin/overview');
+      } catch (error) {
+        console.error("Erro no login:", error);
+        alert("Erro no login: Credenciais inválidas ou servidor offline");
+      }
+    }
   }
 };
 </script>

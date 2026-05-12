@@ -32,31 +32,21 @@ public class SecurityConfig {
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST,
-                                "/api/auth/login",
-                                "/api/auth/register").permitAll()
-                        .requestMatchers("/v3/api-docs/**",
-                                                  "/swagger-ui/**",
-                                                  "/swagger-ui.html").permitAll()
-                        .requestMatchers("/",
-                                                "/index.html",
-                                                "/static/**",
-                                                "/css/**", "/js/**", "/img/**").permitAll()
+                        // Públicos
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/", "/index.html", "/static/**",
+                                            "/css/**", "/js/**", "/img/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+
+                        // O resto é controlado pelo @PreAuthorize no Controller
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html"
-        );
     }
 
     @Bean

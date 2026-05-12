@@ -1,11 +1,15 @@
 package com.ong.amadc.domain.service;
 
+import com.ong.amadc.api.dto.VoluntarioRequestDTO;
 import com.ong.amadc.api.dto.VoluntarioResponseDTO;
+import com.ong.amadc.config.infra.exception.BusinessException;
 import com.ong.amadc.domain.business.VoluntarioBusiness;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 import com.ong.amadc.domain.repository.VoluntarioRepository;
 import com.ong.amadc.domain.validator.VoluntarioValidator;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +37,35 @@ public class VoluntarioService {
         return repository.save(voluntario);
     }
 
-    public List<VoluntarioResponseDTO> listarTodos() {
-        return repository.findAll().stream()
-                .map(VoluntarioResponseDTO::new) // Construtor que recebe a Entity
+    @Transactional(readOnly = true)
+    public List<VoluntarioResponseDTO> listarTodos(Boolean apenasAtivos) {
+        var lista = apenasAtivos ? repository.findAllByAtivoTrue() : repository.findAllByAtivoFalse();
+
+        return lista.stream()
+                .map(VoluntarioResponseDTO::new)
                 .toList();
+    }
+
+    @Transactional
+    public VoluntarioEntidade atualizar(Long id, VoluntarioRequestDTO dto) {
+        var voluntario = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Voluntário não encontrado"));
+
+        BeanUtils.copyProperties(dto, voluntario, "id", "dataCriacao");
+
+        return repository.save(voluntario);
+    }
+
+    @Transactional
+    public void desativar(Long id) {
+        var voluntario = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Voluntário não encontrado"));
+
+        if (!voluntario.getAtivo()) {
+            throw new BusinessException("Este voluntário já se encontra inativo no sistema.");
+        }
+
+        voluntario.setAtivo(false);
+        repository.save(voluntario);
     }
 }
