@@ -25,7 +25,7 @@ const routes = [
     children: [
       {
         path: 'overview',
-        name: 'Dashboard',
+        name: 'Painel',
         component: Overview,
         meta: { icon: 'nc-icon nc-chart-pie-35' }
       },
@@ -34,7 +34,7 @@ const routes = [
         name: 'Voluntários',
         component: TableList, // Usaremos a TableList como base
         meta: {
-          icon: 'nc-icon nc-address-card',
+          icon: 'nc-icon nc-badge',
           permission: 'VOLUNTARIO_READ'
         }
       },

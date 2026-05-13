@@ -6,18 +6,19 @@ const SidebarStore = {
   sidebarLinks: [], // Começa vazio
 
   // Função para popular o menu baseado nas rotas e permissões
-  setLinksFromRoutes (routes, userPermissions) {
+  setLinksFromRoutes (routes, userPermissions = []) {
     const adminRoot = routes.find(r => r.path === '/admin');
     if (!adminRoot) return;
 
+    // Garante que é um array para não dar erro no .includes()
+    const list = Array.isArray(userPermissions) ? userPermissions : [];
+
     this.sidebarLinks = adminRoot.children
       .filter(route => {
-        // Se a rota não tem permissão exigida, qualquer um vê
         if (!route.meta || !route.meta.permission) return true;
 
-        // Verifica se o usuário tem a permissão ou é ADMIN
-        return userPermissions.includes(route.meta.permission) ||
-          userPermissions.includes('ADMIN');
+        // Verifica a permissão específica ou se o usuário tem a role global ADMIN
+        return list.includes(route.meta.permission) || list.includes('ADMIN');
       })
       .map(route => ({
         name: route.name,
