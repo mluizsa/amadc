@@ -30,7 +30,7 @@ public class VoluntarioEntidade extends BaseEntity {
     @Column(name = "volu_telefone")
     private String telefone;
 
-    @Column(name = "volu_email", unique = true)
+    @Column(name = "volu_email")
     private String email;
 
     @Column(name = "volu_data_nascimento")

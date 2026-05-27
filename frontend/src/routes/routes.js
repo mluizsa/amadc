@@ -6,6 +6,7 @@ import Overview from 'src/pages/Overview.vue'
 import UserProfile from 'src/pages/UserProfile.vue'
 import TableList from 'src/pages/TableList.vue'
 import Notifications from 'src/pages/Notifications.vue'
+import VoluntarioForm from 'src/pages/VoluntarioForm.vue'
 
 const routes = [
   {
@@ -32,10 +33,11 @@ const routes = [
       {
         path: 'voluntarios',
         name: 'Voluntários',
-        component: TableList, // Usaremos a TableList como base
+        component: TableList,
         meta: {
           icon: 'nc-icon nc-badge',
-          permission: 'VOLUNTARIO_READ'
+          permission: 'VOLUNTARIO_READ',
+          hidden: false
         }
       },
       {
@@ -43,8 +45,27 @@ const routes = [
         name: 'Animais',
         component: TableList,
         meta: {
-          icon: 'nc-icon nc-prowler',
-          permission: 'ANIMAL_READ'
+          icon: 'fa fa-paw',
+          permission: 'ANIMAL_READ',
+          hidden: false
+        }
+      },
+      {
+        path: 'voluntarios/novo',
+        name: 'Novo Voluntário',
+        component: VoluntarioForm,
+        meta: {
+          permission: 'VOLUNTARIO_WRITE',
+          hidden: true
+        }
+      },
+      {
+        path: 'voluntarios/editar/:id', // ':id' indica um parâmetro dinâmico na URL
+        name: 'Editar Voluntário',
+        component: VoluntarioForm,
+        meta: {
+          permission: 'VOLUNTARIO_WRITE',
+          hidden: true
         }
       }
     ]

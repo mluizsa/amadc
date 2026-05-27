@@ -59,7 +59,7 @@ public class VoluntarioService {
     @Transactional
     public void desativar(Long id) {
         var voluntario = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Voluntário não encontrado"));
+                .orElseThrow(() -> new BusinessException("Voluntário não encontrado"));
 
         if (!voluntario.getAtivo()) {
             throw new BusinessException("Este voluntário já se encontra inativo no sistema.");
@@ -67,5 +67,13 @@ public class VoluntarioService {
 
         voluntario.setAtivo(false);
         repository.save(voluntario);
+    }
+
+    @Transactional(readOnly = true)
+    public VoluntarioResponseDTO buscarPorId(Long idVoluntario) {
+         VoluntarioEntidade voluntarioEntidade = repository.findById(idVoluntario)
+                .orElseThrow(() ->
+                        new BusinessException("Voluntário não encontrado com o ID: " + idVoluntario));
+        return new VoluntarioResponseDTO(voluntarioEntidade);
     }
 }

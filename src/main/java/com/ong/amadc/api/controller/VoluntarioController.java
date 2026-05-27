@@ -24,7 +24,7 @@ public class VoluntarioController {
     private VoluntarioService service;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
     public ResponseEntity<VoluntarioEntidade> cadastrar(@RequestBody @Valid VoluntarioRequestDTO dto) {
         var salvo = service.cadastrar(dto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
@@ -37,6 +37,16 @@ public class VoluntarioController {
     public ResponseEntity<List<VoluntarioResponseDTO>> listar(
             @RequestParam(name = "ativos", required = false, defaultValue = "true") Boolean ativos) {
         var voluntarios = service.listarTodos(ativos);
+        return ResponseEntity.ok(voluntarios);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_READ', 'ADMIN')")
+    @Operation(summary = "Voluntário por ID",
+               description = "Busca e exibe os dados detalhados de um único voluntário pelo seu ID.")
+    public ResponseEntity<VoluntarioResponseDTO> exibirVoluntario(
+            @PathVariable(name = "id") Long idVoluntario) {
+        var voluntarios = service.buscarPorId(idVoluntario);
         return ResponseEntity.ok(voluntarios);
     }
 

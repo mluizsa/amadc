@@ -19,4 +19,6 @@ public interface VoluntarioRepository extends JpaRepository<VoluntarioEntidade, 
     List<VoluntarioEntidade> findAllByAtivoTrue();
 
     List<VoluntarioEntidade> findAllByAtivoFalse();
+
+    boolean existsByEmailAndAtivoTrue(String email);
 }

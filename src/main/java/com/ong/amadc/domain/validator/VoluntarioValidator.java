@@ -18,10 +18,11 @@ public class VoluntarioValidator {
         if (repository.existsByCpf(voluntario.getCpf())) {
             throw new BusinessException("Já existe um voluntário cadastrado com este CPF.");
         }
-
         if (voluntario.getDataNascimento().isAfter(LocalDate.now().minusYears(16))) {
             throw new BusinessException("O voluntário deve ter pelo menos 16 anos.");
         }
-        // Adicione outras validações específicas aqui
+        if (repository.existsByEmailAndAtivoTrue(voluntario.getEmail())) {
+            throw new BusinessException("Já existe um voluntário ATIVO cadastrado com este e-mail.");
+        }
     }
 }
