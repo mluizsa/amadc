@@ -1,10 +1,9 @@
-package com.ong.amadc.service;
+package com.ong.amadc.domain.service;
 
 import com.ong.amadc.config.infra.security.TokenService;
-import com.ong.amadc.domain.model.Usuario;
-import com.ong.amadc.dto.LoginRequestDTO;
-import com.ong.amadc.dto.TokenResponseDTO;
-import com.ong.amadc.dto.UsuarioDetalhesDTO;
+import com.ong.amadc.domain.model.UsuarioEntidade;
+import com.ong.amadc.api.dto.LoginRequestDTO;
+import com.ong.amadc.api.dto.UsuarioDetalhesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
@@ -32,7 +31,7 @@ public class AuthService {
             var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
             var auth = this.authenticationManager.authenticate(usernamePassword);
 
-            String token = tokenService.generateToken((Usuario) auth.getPrincipal());
+            String token = tokenService.generateToken((UsuarioEntidade) auth.getPrincipal());
 
             ResponseCookie cookie = ResponseCookie.from("user_token", token)
                     .httpOnly(true)
@@ -65,7 +64,7 @@ public class AuthService {
     }
 
     public UsuarioDetalhesDTO obterDadosUsuarioLogado(Authentication auth) {
-        Usuario user = (Usuario) auth.getPrincipal();
+        UsuarioEntidade user = (UsuarioEntidade) auth.getPrincipal();
         var permissoes = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();

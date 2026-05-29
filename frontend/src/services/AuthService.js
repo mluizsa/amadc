@@ -23,6 +23,12 @@ class AuthService {
     });
   }
 
+  getMe() {
+    return axios.get(API_URL + 'me').then(response => {
+      return response.data; // Retorna { id, login, email, permissoes: [...] }
+    });
+  }
+
 }
 
 export default new AuthService();

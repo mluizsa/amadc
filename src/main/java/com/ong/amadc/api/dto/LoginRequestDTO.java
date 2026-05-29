@@ -1,4 +1,4 @@
-package com.ong.amadc.dto;
+package com.ong.amadc.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

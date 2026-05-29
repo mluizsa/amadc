@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Voluntario extends BaseEntity {
+public class VoluntarioEntidade extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +30,7 @@ public class Voluntario extends BaseEntity {
     @Column(name = "volu_telefone")
     private String telefone;
 
-    @Column(name = "volu_email", unique = true)
+    @Column(name = "volu_email")
     private String email;
 
     @Column(name = "volu_data_nascimento")

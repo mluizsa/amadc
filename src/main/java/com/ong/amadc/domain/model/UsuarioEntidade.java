@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario extends BaseEntity implements UserDetails {
+public class UsuarioEntidade extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class Usuario extends BaseEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "usu_id"),
             inverseJoinColumns = @JoinColumn(name = "perf_id")
     )
-    private Set<Perfil> perfis;
+    private Set<PerfilEntidade> perfis;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

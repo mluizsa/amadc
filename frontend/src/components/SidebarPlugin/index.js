@@ -3,13 +3,31 @@ import SidebarLink from './SidebarLink.vue'
 
 const SidebarStore = {
   showSidebar: false,
-  sidebarLinks: [
-    {
-      name: 'Dashboard',
-      icon: 'ti-panel',
-      path: '/admin/overview'
-    }
-  ],
+  sidebarLinks: [], // Começa vazio
+
+  // Função para popular o menu baseado nas rotas e permissões
+  setLinksFromRoutes (routes, userPermissions = []) {
+    const adminRoot = routes.find(r => r.path === '/admin');
+    if (!adminRoot) return;
+
+    // Garante que é um array para não dar erro no .includes()
+    const list = Array.isArray(userPermissions) ? userPermissions : [];
+
+    this.sidebarLinks = adminRoot.children
+      .filter(route => {
+        if (route.meta && route.meta.hidden) return false;
+
+        if (!route.meta || !route.meta.permission) return true;
+
+        // Verifica a permissão específica ou se o usuário tem a role global ADMIN
+        return list.includes(route.meta.permission) || list.includes('ADMIN');
+      })
+      .map(route => ({
+        name: route.name,
+        icon: route.meta.icon || 'ti-view-list',
+        path: `/admin/${route.path}`
+      }));
+  },
   displaySidebar (value) {
     this.showSidebar = value
   }

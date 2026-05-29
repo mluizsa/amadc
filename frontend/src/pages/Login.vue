@@ -17,19 +17,19 @@
                 <div class="form-group mb-3">
                   <label class="text-uppercase small font-weight-bold">Usuário</label>
                   <div class="input-group">
-                    <input type="text" 
-                           class="form-control" 
-                           placeholder="Ex: administrador" 
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Ex: administrador"
                            v-model="user.username"
                            required>
                   </div>
                 </div>
-                
+
                 <div class="form-group mb-4">
                   <label class="text-uppercase small font-weight-bold">Senha</label>
-                  <input type="password" 
-                         class="form-control" 
-                         placeholder="••••••••" 
+                  <input type="password"
+                         class="form-control"
+                         placeholder="••••••••"
                          v-model="user.password"
                          required>
                 </div>
@@ -109,6 +109,7 @@
 
 <script>
 import AuthService from '../services/AuthService';
+import routes from '../routes/routes';
 
 export default {
   name: 'Login',
@@ -121,24 +122,44 @@ export default {
     };
   },
   methods: {
-    handleLogin() {
-    console.log("Iniciando processo de login...");
-  
-  AuthService.login(this.user)
-    .then((response) => {
-      console.log("Login bem-sucedido no servidor!");
-      
-      this.$router.push('/admin/overview');
-    })
-    .catch(error => {
-      console.error("Erro real no login:", error);
-      
-      if (error.message && error.message.includes('undefined')) return;
+    /**
+     * Gerencia o processo de autenticação.
+     * 1. Realiza o login.
+     * 2. Busca as informações e permissões do usuário logado.
+     * 3. Configura os links do menu lateral baseando-se nessas permissões.
+     * 4. Redireciona para o Dashboard.
+     */
+    async handleLogin() {
+      try {
+        console.log("Iniciando processo de login...");
 
-      const msg = error.response && error.response.data ? error.response.data : "Credenciais inválidas";
-      alert("Erro no login: " + msg);
-    });
-  }
+        // 1. Tenta realizar o login no Spring Boot
+        await AuthService.login(this.user);
+        console.log("Login realizado com sucesso!");
+
+        // 2. Busca os dados do usuário (ID, Login, Permissões) do endpoint /api/auth/me
+        const userData = await AuthService.getMe();
+        console.log("Dados do usuário e permissões recebidos:", userData.permissoes);
+        console.log("Objeto retornado pelo /me:", userData); // Veja a estrutura real aqui
+        const permissoesAtuais = userData.permissions || [] ;
+        // 3. Atualiza o estado global do SidebarPlugin com as rotas permitidas
+        // Isso fará com que o menu "Voluntários" ou "Animais" apareça automaticamente
+        this.$sidebar.setLinksFromRoutes(routes, permissoesAtuais);
+
+        // 4. Navega para a área administrativa
+        this.$router.push('/admin/overview');
+
+      } catch (error) {
+        console.error("Erro durante o fluxo de login:", error);
+
+        // Tratamento de erro amigável
+        const mensagemErro = error.response && error.response.data
+          ? error.response.data
+          : "Credenciais inválidas ou servidor fora do ar.";
+
+        alert("Erro no acesso: " + mensagemErro);
+      }
+    }
   }
 };
 </script>
