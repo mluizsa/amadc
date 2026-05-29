@@ -6,33 +6,42 @@
     <div class="sidebar-wrapper">
       <div class="logo">
         <a href="#" class="simple-text logo__container">
-            <div class="logo-img">
-                <img src="../../assets/img/logo.jpg" style="width: 120px;" alt="Logo AMA DC">
-            </div>
+          <div class="logo-img">
+            <img src="../../assets/img/logo.jpg" style="width: 120px;" alt="Logo AMA DC">
+          </div>
           {{title}}
         </a>
       </div>
 
       <slot name="content"></slot>
+      
       <ul class="nav nav-main__links">
-        <!--By default vue-router adds an active class to each route link. This way the links are colored when clicked-->
-        <slot>
-          <sidebar-link v-for="(link,index) in sidebarLinks"
-                        :key="link.name + index"
+        <template v-for="(link, index) in sidebarLinks">
+          
+          <li v-if="link.meta && link.meta.category && shouldShowCategoryTitle(link, index)" 
+              :key="'cat-' + index" 
+              class="sidebar-category-title">
+            <span>{{ link.meta.category }}</span>
+          </li>
+
+          <sidebar-link :key="link.name + index"
                         :to="link.path"
                         @click="closeNavbar"
                         :link="link">
             <i :class="link.icon"></i>
             <p>{{link.name}}</p>
           </sidebar-link>
-        </slot>
+
+        </template>
       </ul>
+      
       <ul class="nav nav-bottom" v-if="$slots['bottom-links']">
         <slot name="bottom-links"></slot>
       </ul>
     </div>
   </div>
 </template>
+
 <script>
   import SidebarLink from './SidebarLink.vue'
 
@@ -84,20 +93,60 @@
         return {
           backgroundImage: `url(${this.backgroundImage})`
         }
+      },
+      // Filtra links marcados com hidden no meta para não poluírem a lista
+      visibleLinks() {
+        return this.sidebarLinks.filter(link => {
+          if (link.meta && link.meta.hidden === true) {
+            return false;
+          }
+          return true;
+        });
+      }
+    },
+    methods: {
+      // Método lógico que descobre se precisa renderizar o cabeçalho de categoria
+      shouldShowCategoryTitle(currentLink, index) {
+        if (index === 0) return true;
+        
+        const previousLink = this.visibleLinks[index - 1];
+        const currentCategory = currentLink.meta ? currentLink.meta.category : null;
+        const previousCategory = previousLink.meta ? previousLink.meta.category : null;
+        
+        return currentCategory !== previousCategory;
+      },
+      closeNavbar() {
+        if (this.$sidebar && this.$sidebar.showSidebar) {
+          this.$sidebar.displaySidebar(false);
+        }
       }
     }
   }
-
 </script>
-<style>
+
+<style scoped>
   .sidebar .sidebar-wrapper {
     display: flex;
     flex-direction: column;
   }
- .sidebar .nav-main__links {
-   flex: 1;
- }
- .sidebar .sidebar-wrapper .logo .logo__container {
-   padding-left: 10px;
- }
+  .sidebar .nav-main__links {
+    flex: 1;
+    padding-top: 10px;
+  }
+  .sidebar .sidebar-wrapper .logo .logo__container {
+    padding-left: 10px;
+  }
+  
+  /* Estilização limpa e moderna para os Subtítulos das Categorias */
+  .sidebar-category-title {
+    padding: 15px 20px 5px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    display: block;
+    width: 100%;
+    pointer-events: none; /* Evita cliques acidentais */
+  }
 </style>

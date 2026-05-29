@@ -22,20 +22,20 @@
             </div>
 
             <div v-else class="table-responsive custom-table-wrapper">
-              <table class="table text-nowrap table-flexbox">
-                <thead>
-                  <tr class="header-flex-row">
-                    <th class="cell-arrow"></th>
-                    <th class="cell-name">NOME</th>
-                    <th class="cell-phone">TELEFONE</th>
-                    <th class="cell-email">E-MAIL</th>
-                    <th class="cell-status text-center">STATUS</th>
-                    <th class="cell-actions text-center">AÇÕES</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div class="table text-nowrap table-flexbox">
+                
+                <div class="header-flex-row">
+                  <div class="cell-arrow"></div> <div class="cell-name">NOME</div>
+                  <div class="cell-phone">TELEFONE</div>
+                  <div class="cell-email">E-MAIL</div>
+                  <div class="cell-status text-center">STATUS</div>
+                  <div class="cell-access text-center">ACESSO</div>
+                  <div class="cell-actions text-center">AÇÕES</div>
+                </div>
+
+                <div class="table-body-flex">
                   <template v-for="(item, index) in tableData.data">
-                    <tr
+                    <div
                       :key="'row-' + index"
                       @click="toggleRow(item.id)"
                       class="clickable-row-group"
@@ -48,11 +48,22 @@
                         <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
                         <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
                         <div class="cell-data cell-email">{{ item.email }}</div>
+                        
                         <div class="cell-data cell-status text-center">
-                          <span :class="item.ativo ? 'badge badge-danger' : 'badge badge-success'">
-                            {{ item.ativo ? 'Inativo' : 'Ativo' }}
+                          <span :class="!item.ativo ? 'badge badge-danger' : 'badge badge-success'">
+                            {{ !item.ativo ? 'Inativo' : 'Ativo' }}
                           </span>
                         </div>
+
+                        <div class="cell-data cell-access text-center">
+                          <span v-if="item.usuario && item.usuario.ativo" class="badge-acesso liberado">
+                            <i class="fa fa-unlock-alt"></i> Liberado
+                          </span>
+                          <span v-else class="badge-acesso bloqueado">
+                            <i class="fa fa-lock"></i> Bloqueado
+                          </span>
+                        </div>
+
                         <div class="cell-data cell-actions text-center" @click.stop>
                           <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
                             <i class="fa fa-edit fa-lg"></i>
@@ -82,6 +93,10 @@
                               <span class="info-label">Ocupação / Cargo</span>
                               <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
                             </div>
+                            <div v-if="item.usuario" class="col-12 col-sm-6 col-md-3 info-box">
+                              <span class="info-label">Usuário do Sistema</span>
+                              <p class="info-value text-info">@{{ item.usuario.username }}</p>
+                            </div>
                           </div>
 
                           <div class="row m-0 mt-3">
@@ -92,10 +107,11 @@
                           </div>
                         </div>
                       </div>
-                    </tr>
+                    </div>
                   </template>
-                </tbody>
-              </table>
+                </div>
+
+              </div>
             </div>
 
             <div v-if="!loading && tableData.data.length === 0" class="text-center p-4 text-muted">
@@ -114,7 +130,7 @@
         <h3 class="modal-title">Desativar Voluntário</h3>
         <p class="modal-text">
           Você está prestes a desativar <strong>{{ modalInativar.item ? modalInativar.item.nome : '' }}</strong>.<br>
-          Este registro não constará mais na lista de voluntários ativos.
+          Este registro não constará mais na lista de voluntários activos.
         </p>
         <div class="modal-actions-buttons">
           <button class="btn btn-neutral btn-fill" @click="fecharModalInativar">Cancelar</button>
@@ -177,15 +193,11 @@
 
       formatarData(dataIso) {
         if (!dataIso) return 'Não informada';
-
-        // Trata strings de data puras como '1995-10-25' quebrando os hífenes
-        // Isso evita bugs de fuso horário que o "new Date()" nativo costuma causar
         const partes = dataIso.split('-');
         if (partes.length === 3) {
           const [ano, mes, dia] = partes;
           return `${dia}/${mes}/${ano}`;
         }
-
         return dataIso;
       },
 
@@ -246,7 +258,6 @@
   width: 100%;
 }
 
-/* Força a tabela inteira a seguir flexbox para harmonizar com o tema */
 .table-flexbox {
   display: flex !important;
   flex-direction: column !important;
@@ -261,7 +272,6 @@
   width: 100% !important;
 }
 
-/* Alinhamento perfeito do cabeçalho */
 .header-flex-row {
   display: flex !important;
   width: 100% !important;
@@ -276,11 +286,10 @@
   color: #666;
 }
 
-/* Estrutura das Linhas de Registro */
 .clickable-row-group {
   cursor: pointer;
   display: flex !important;
-  flex-wrap: wrap !important; /* Permite que o painel expandido caia para baixo */
+  flex-wrap: wrap !important;
   width: 100% !important;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid #eeeeee !important;
@@ -294,7 +303,6 @@
   background-color: #fcfdfe !important;
 }
 
-/* Alinhamento estrito horizontal dos dados superiores */
 .main-row-data {
   display: flex !important;
   width: 100% !important;
@@ -308,15 +316,34 @@
   overflow: hidden;
 }
 
-/* Definição exata das larguras das colunas */
+/* 🌟 Larguras recalculadas para incluir a nova coluna simetricamente */
 .cell-arrow    { width: 5%; min-width: 45px; }
-.cell-name     { width: 25%; }
-.cell-phone    { width: 20%; }
-.cell-email    { width: 30%; }
+.cell-name     { width: 22%; }
+.cell-phone    { width: 18%; }
+.cell-email    { width: 25%; }
 .cell-status   { width: 10%; }
+.cell-access   { width: 10%; }
 .cell-actions  { width: 10%; }
 
-/* Dropdown Ocupando 100% real abaixo dos dados principais */
+/* Estilização dos Badges de Acesso Customizados */
+.badge-acesso {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-acesso.liberated, .badge-acesso.liberado {
+  background-color: #e6f9f3;
+  color: #10b981;
+}
+.badge-acesso.bloqueado {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
 .full-width-dropdown {
   flex: 0 0 100% !important;
   width: 100% !important;
@@ -325,7 +352,7 @@
 }
 
 .detail-container {
-  padding: 25px 30px 25px 50px; /* Recuo extra para alinhar após a seta */
+  padding: 25px 30px 25px 50px;
   border-left: 4px solid #00bcd4;
   background-color: #f8fafc;
   width: 100%;
@@ -342,7 +369,6 @@
   letter-spacing: 0.8px;
 }
 
-/* Configuração dos blocos internos de informação */
 .info-box {
   margin-bottom: 15px;
   text-align: left !important;
@@ -376,7 +402,6 @@
   line-height: 1.5;
 }
 
-/* Animações e Ícones */
 .arrow-icon {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -392,12 +417,6 @@
   border-radius: 4px;
 }
 
-.action-cells .btn-link {
-  padding: 5px 10px;
-  margin: 0 2px;
-  border: none;
-}
-
 .animated { animation-duration: 0.25s; animation-fill-mode: both; }
 .fadeInFast { animation-name: fadeIn; animation-duration: 0.18s; }
 @keyframes fadeIn {
@@ -405,7 +424,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Modal CSS */
 .custom-modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.4); z-index: 1050; backdrop-filter: blur(4px); }
 .custom-modal-card { background: #FFFFFF; padding: 30px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
 .modal-icon-wrapper { font-size: 52px; margin-bottom: 15px; }

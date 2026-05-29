@@ -13,9 +13,11 @@ public record VoluntarioResponseDTO(
         String telefone,
         String email,
         String ocupacao,
-        LocalDateTime dataCriacao, // Novo campo
+        LocalDateTime dataCriacao,
         String registradoPor,
-        String observacoes// Novo campo
+        String observacoes,
+        boolean ativo,
+        VoluntarioUsuarioResponseDTO usuario
 ) {
     public VoluntarioResponseDTO(VoluntarioEntidade voluntario) {
         this(
@@ -28,7 +30,9 @@ public record VoluntarioResponseDTO(
                 voluntario.getOcupacao(),
                 voluntario.getDataCriacao(),
                 voluntario.getRegistradoPor(),
-                voluntario.getObservacoes()
+                voluntario.getObservacoes(),
+                voluntario.getAtivo(),
+                voluntario.getUsuario() != null ? new VoluntarioUsuarioResponseDTO(voluntario.getUsuario()) : null
         );
     }
 }

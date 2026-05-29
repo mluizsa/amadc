@@ -28,8 +28,24 @@ const routes = [
         path: 'overview',
         name: 'Painel',
         component: Overview,
-        meta: { icon: 'nc-icon nc-chart-pie-35' }
+        meta: { 
+          icon: 'nc-icon nc-chart-pie-35',
+          hidden: false
+        }
       },
+      // --- CATEGORIA: GESTÃO OPERACIONAL ---
+      {
+        path: 'animais',
+        name: 'Animais',
+        component: TableList, // Depois mudaremos para o componente específico de Animais
+        meta: {
+          icon: 'fa fa-paw',
+          permission: 'ANIMAL_READ',
+          category: 'Gestão Operacional',
+          hidden: false
+        }
+      },
+      // --- CATEGORIA: CONFIGURAÇÕES E RH ---
       {
         path: 'voluntarios',
         name: 'Voluntários',
@@ -37,19 +53,11 @@ const routes = [
         meta: {
           icon: 'nc-icon nc-badge',
           permission: 'VOLUNTARIO_READ',
+          category: 'Configurações e RH',
           hidden: false
         }
       },
-      {
-        path: 'animais',
-        name: 'Animais',
-        component: TableList,
-        meta: {
-          icon: 'fa fa-paw',
-          permission: 'ANIMAL_READ',
-          hidden: false
-        }
-      },
+      // --- ROTAS INTERNAS (ESCONDIDAS DO MENU) ---
       {
         path: 'voluntarios/novo',
         name: 'Novo Voluntário',
@@ -60,7 +68,7 @@ const routes = [
         }
       },
       {
-        path: 'voluntarios/editar/:id', // ':id' indica um parâmetro dinâmico na URL
+        path: 'voluntarios/editar/:id',
         name: 'Editar Voluntário',
         component: VoluntarioForm,
         meta: {

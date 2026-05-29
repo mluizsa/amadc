@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * DTO para entrada de dados no cadastro de voluntários.
@@ -34,7 +35,13 @@ public record VoluntarioRequestDTO(
 
         String ocupacao,
 
-        String observacoes
+        String observacoes,
+
+        // --- CONTROLE DE ACESSO ---
+        Boolean permitirAcesso,
+        String username,
+        String senhaProvisoria,
+        Set<Long> perfilIds
 ) {
         public VoluntarioEntidade toEntity() {
                 var entidade = new VoluntarioEntidade();
