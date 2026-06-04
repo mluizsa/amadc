@@ -10,22 +10,20 @@ const SidebarStore = {
     const adminRoot = routes.find(r => r.path === '/admin');
     if (!adminRoot) return;
 
-    // Garante que é um array para não dar erro no .includes()
     const list = Array.isArray(userPermissions) ? userPermissions : [];
 
     this.sidebarLinks = adminRoot.children
       .filter(route => {
         if (route.meta && route.meta.hidden) return false;
-
         if (!route.meta || !route.meta.permission) return true;
-
-        // Verifica a permissão específica ou se o usuário tem a role global ADMIN
         return list.includes(route.meta.permission) || list.includes('ADMIN');
       })
       .map(route => ({
         name: route.name,
         icon: route.meta.icon || 'ti-view-list',
-        path: `/admin/${route.path}`
+        path: `/admin/${route.path}`,
+        isHeader: route.meta && route.meta.isHeader ? true : false,
+        headerTitle: route.meta && route.meta.headerTitle ? route.meta.headerTitle : ''
       }));
   },
   displaySidebar (value) {

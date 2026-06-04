@@ -15,15 +15,14 @@
 
       <slot name="content"></slot>
       <ul class="nav nav-main__links">
-        <!--By default vue-router adds an active class to each route link. This way the links are colored when clicked-->
         <slot>
-          <sidebar-link v-for="(link,index) in sidebarLinks"
-                        :key="link.name + index"
+          <sidebar-link v-for="(link, index) in sidebarLinks"
+                        :key="'sidebar-item-' + index"
                         :to="link.path"
                         @click="closeNavbar"
                         :link="link">
             <i :class="link.icon"></i>
-            <p>{{link.name}}</p>
+            <p>{{ link.name }}</p>
           </sidebar-link>
         </slot>
       </ul>
@@ -33,6 +32,7 @@
     </div>
   </div>
 </template>
+
 <script>
   import SidebarLink from './SidebarLink.vue'
 
@@ -85,10 +85,28 @@
           backgroundImage: `url(${this.backgroundImage})`
         }
       }
+    },
+    methods: {
+      closeNavbar () {
+        if (this.autoClose && this.$sidebar && this.$sidebar.showSidebar) {
+          this.$sidebar.displaySidebar(false)
+        }
+      },
+      // Lógica para não duplicar o título do grupo no menu
+      deveExibirGrupo(link, index) {
+        // Se o link não tiver grupo definido, não exibe nada
+        if (!link.group) return false;
+        
+        // Se for o primeiro item da lista inteira e tem grupo, exibe
+        if (index === 0) return true;
+        
+        // Só exibe se o grupo do item atual for DIFERENTE do grupo do item anterior
+        return link.group !== this.sidebarLinks[index - 1].group;
+      }
     }
   }
-
 </script>
+
 <style>
   .sidebar .sidebar-wrapper {
     display: flex;
@@ -99,5 +117,22 @@
  }
  .sidebar .sidebar-wrapper .logo .logo__container {
    padding-left: 10px;
+ }
+
+ /* Margem adicional caso não seja o primeiro item do menu */
+ .sidebar-group-title:not(:first-child) {
+   margin-top: 15px;
+ }
+
+ .sidebar-group-title {
+   padding: 22px 0px 6px 25px;
+   font-size: 11px;
+   font-weight: 800;
+   text-transform: uppercase;
+   letter-spacing: 1.5px;
+   color: #ffffff !important; /* 🌟 Branco total para destacar no fundo escuro */
+   list-style-type: none;
+   display: block;
+   width: 100%;
  }
 </style>

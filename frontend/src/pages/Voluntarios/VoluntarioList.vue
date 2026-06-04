@@ -49,15 +49,18 @@
                         <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
                         <div class="cell-data cell-email">{{ item.email }}</div>
                         <div class="cell-data cell-status text-center">
-                          <span :class="item.ativo ? 'badge badge-danger' : 'badge badge-success'">
-                            {{ item.ativo ? 'Inativo' : 'Ativo' }}
+                          <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
+                            {{ item.ativo ? 'Ativo' : 'Inativo' }}
                           </span>
                         </div>
                         <div class="cell-data cell-actions text-center" @click.stop>
                           <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
                             <i class="fa fa-edit fa-lg"></i>
                           </button>
-                          <button class="btn btn-danger btn-link btn-xs" title="Inativar" :disabled="item.ativo === false" @click="handleInactivate(item)">
+                          <button class="btn btn-danger btn-link btn-xs" 
+                                  title="Inativar" 
+                                  :disabled="!item.ativo" 
+                                  @click="handleInactivate(item)">
                             <i class="fa fa-ban fa-lg"></i>
                           </button>
                         </div>
@@ -157,7 +160,7 @@
         this.loading = true;
         try {
           const endpoint = this.$route.path.replace('/admin/', '');
-          const response = await axios.get(`/api/${endpoint}`);
+          const response = await axios.get(`/api/voluntarios`);
           this.tableData.data = response.data;
         } catch (error) {
           console.error("Erro ao carregar dados", error);

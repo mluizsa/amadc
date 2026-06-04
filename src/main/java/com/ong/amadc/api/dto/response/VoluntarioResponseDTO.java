@@ -13,7 +13,8 @@ public record VoluntarioResponseDTO(
         String telefone,
         String email,
         String ocupacao,
-        LocalDateTime dataCriacao, // Novo campo
+        LocalDateTime dataCriacao,
+        Boolean ativo,
         String registradoPor,
         String observacoes// Novo campo
 ) {
@@ -27,6 +28,7 @@ public record VoluntarioResponseDTO(
                 voluntario.getEmail(),
                 voluntario.getOcupacao(),
                 voluntario.getDataCriacao(),
+                voluntario.getAtivo(),
                 voluntario.getRegistradoPor(),
                 voluntario.getObservacoes()
         );

@@ -18,7 +18,7 @@
       updateMenu() {
         // Aqui você pegaria as permissões do seu Store (Pinia/Vuex) ou do localStorage
         // Por enquanto, vamos passar um array com 'ADMIN' para testar se o menu aparece
-        const userPermissions = ['ADMIN', 'VOLUNTARIO_READ'];
+        const userPermissions = ['ADMIN', 'VOLUNTARIO_ANIMAIS', 'VOLUNTARIO_FINANCEIRO'];
 
         this.$sidebar.setLinksFromRoutes(routes, userPermissions);
       }

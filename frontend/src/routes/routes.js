@@ -3,10 +3,14 @@ import NotFound from '../pages/NotFoundPage.vue'
 import Login from '../pages/Login.vue'
 
 import Overview from 'src/pages/Overview.vue'
-import UserProfile from 'src/pages/UserProfile.vue'
-import TableList from 'src/pages/TableList.vue'
-import Notifications from 'src/pages/Notifications.vue'
-import VoluntarioForm from 'src/pages/VoluntarioForm.vue'
+import UserProfile from 'src/pages/UserProfile/UserProfile.vue'
+
+// Importações do Módulo de Voluntários
+import VoluntarioList from 'src/pages/Voluntarios/VoluntarioList.vue'
+import VoluntarioForm from 'src/pages/Voluntarios/VoluntarioForm.vue'
+
+// Importações do Módulo de Animais
+import AnimalList from 'src/pages/Animais/AnimalList.vue'
 
 const routes = [
   {
@@ -28,44 +32,81 @@ const routes = [
         path: 'overview',
         name: 'Painel',
         component: Overview,
-        meta: { icon: 'nc-icon nc-chart-pie-35' }
-      },
-      {
-        path: 'voluntarios',
-        name: 'Voluntários',
-        component: TableList,
-        meta: {
-          icon: 'nc-icon nc-badge',
-          permission: 'VOLUNTARIO_READ',
-          hidden: false
+        meta: { 
+          icon: 'nc-icon nc-chart-pie-35',
+          isHeader: true,        // 🌟 Adicionado para criar a seção inicial
+          headerTitle: 'Início'
         }
       },
+      /* =========================================================================
+         MÓDULO DE ANIMAIS
+         ========================================================================= */
       {
         path: 'animais',
         name: 'Animais',
-        component: TableList,
+        component: AnimalList,
         meta: {
           icon: 'fa fa-paw',
-          permission: 'ANIMAL_READ',
-          hidden: false
+          permission: 'VOLUNTARIO_ANIMAIS', // 🌟 Atualizado para sua nova permissão
+          hidden: false,
+          isHeader: true,        // Divisor do menu
+          headerTitle: 'Animais'
+        }
+      },
+      /* =========================================================================
+         MÓDULO FINANCEIRO (Exemplo de expansão futura)
+         ========================================================================= */
+      {
+        path: 'financeiro',
+        name: 'Caixa / Custos',
+        component: Overview, // Temporário, aponte para seu futuro componente financeiro
+        meta: {
+          icon: 'nc-icon nc-money-coins',
+          permission: 'VOLUNTARIO_FINANCEIRO', // 🌟 Sua nova permissão financeira
+          hidden: false,
+          isHeader: true,        // Divisor do menu
+          headerTitle: 'Gestão Financeira'
+        }
+      },
+      /* =========================================================================
+         MÓDULO DE VOLUNTÁRIOS (RH | GESTÃO)
+         ========================================================================= */
+      {
+        path: 'voluntarios',
+        name: 'Voluntários',
+        component: VoluntarioList,
+        meta: {
+          icon: 'nc-icon nc-badge',
+          permission: 'VOLUNTARIO_READ',
+          hidden: false,
+          isHeader: true,        // Divisor do menu
+          headerTitle: 'RH | Gestão'
         }
       },
       {
         path: 'voluntarios/novo',
         name: 'Novo Voluntário',
         component: VoluntarioForm,
-        meta: {
-          permission: 'VOLUNTARIO_WRITE',
-          hidden: true
-        }
+        meta: { permission: 'VOLUNTARIO_WRITE', hidden: true }
       },
       {
-        path: 'voluntarios/editar/:id', // ':id' indica um parâmetro dinâmico na URL
+        path: 'voluntarios/editar/:id',
         name: 'Editar Voluntário',
         component: VoluntarioForm,
-        meta: {
-          permission: 'VOLUNTARIO_WRITE',
-          hidden: true
+        meta: { permission: 'VOLUNTARIO_WRITE', hidden: true }
+      },
+      /* =========================================================================
+         PERFIL DO USUÁRIO
+         ========================================================================= */
+      {
+        path: 'user',
+        name: 'Meu Perfil',
+        component: UserProfile,
+        meta: { 
+          icon: 'fa fa-user',
+          hidden: false,
+          isHeader: true,        // Divisor do menu
+          headerTitle: 'Configurações'
         }
       }
     ]
