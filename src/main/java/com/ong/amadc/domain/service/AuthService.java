@@ -2,8 +2,8 @@ package com.ong.amadc.domain.service;
 
 import com.ong.amadc.config.infra.security.TokenService;
 import com.ong.amadc.domain.model.UsuarioEntidade;
-import com.ong.amadc.api.dto.LoginRequestDTO;
-import com.ong.amadc.api.dto.UsuarioDetalhesDTO;
+import com.ong.amadc.api.dto.request.LoginRequestDTO;
+import com.ong.amadc.api.dto.response.UsuarioDetalhesDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;

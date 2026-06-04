@@ -1,7 +1,7 @@
 package com.ong.amadc.domain.service;
 
-import com.ong.amadc.api.dto.VoluntarioRequestDTO;
-import com.ong.amadc.api.dto.VoluntarioResponseDTO;
+import com.ong.amadc.api.dto.request.VoluntarioRequestDTO;
+import com.ong.amadc.api.dto.response.VoluntarioResponseDTO;
 import com.ong.amadc.config.infra.exception.BusinessException;
 import com.ong.amadc.domain.business.VoluntarioBusiness;
 import com.ong.amadc.domain.model.VoluntarioEntidade;

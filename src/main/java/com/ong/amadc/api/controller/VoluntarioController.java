@@ -1,7 +1,7 @@
 package com.ong.amadc.api.controller;
 
-import com.ong.amadc.api.dto.VoluntarioRequestDTO;
-import com.ong.amadc.api.dto.VoluntarioResponseDTO;
+import com.ong.amadc.api.dto.request.VoluntarioRequestDTO;
+import com.ong.amadc.api.dto.response.VoluntarioResponseDTO;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 import com.ong.amadc.domain.service.VoluntarioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +25,8 @@ public class VoluntarioController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @Operation(summary = "Cadastrar voluntários",
+            description = "Cadastro de voluntários na ONG")
     public ResponseEntity<VoluntarioEntidade> cadastrar(@RequestBody @Valid VoluntarioRequestDTO dto) {
         var salvo = service.cadastrar(dto.toEntity());
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
@@ -52,6 +54,8 @@ public class VoluntarioController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @Operation(summary = "Edição do voluntário",
+            description = "Edição de voluntários na ONG")
     public ResponseEntity<VoluntarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid VoluntarioRequestDTO dto) {
         var atualizado = service.atualizar(id, dto);
         return ResponseEntity.ok(new VoluntarioResponseDTO(atualizado));
@@ -59,6 +63,8 @@ public class VoluntarioController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @Operation(summary = "Exclusão de voluntário",
+            description = "Exclusão lógica de voluntários na ONG")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
         service.desativar(id);
         return ResponseEntity.noContent().build();

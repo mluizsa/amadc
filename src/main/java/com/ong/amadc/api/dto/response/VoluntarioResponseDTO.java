@@ -1,4 +1,4 @@
-package com.ong.amadc.api.dto;
+package com.ong.amadc.api.dto.response;
 
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 

@@ -1,5 +1,5 @@
 -- Tabela de Tipos de Atendimento
-CREATE TABLE tipo_atendimento (
+CREATE TABLE IF NOT EXISTS tipo_atendimento (
     tiat_id BIGSERIAL PRIMARY KEY,
     tiat_descricao VARCHAR(100) NOT NULL UNIQUE,
     data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -9,7 +9,7 @@ CREATE TABLE tipo_atendimento (
 );
 
 -- Auditoria de Tipos de Atendimento
-CREATE TABLE tipo_atendimento_aud (
+CREATE TABLE IF NOT EXISTS tipo_atendimento_aud (
     tiat_id BIGINT NOT NULL,
     rev BIGINT NOT NULL,
     revtype SMALLINT NOT NULL,
@@ -29,11 +29,22 @@ INSERT INTO tipo_atendimento (tiat_descricao, registrado_por) VALUES
 ('CASTRACAO', 'SISTEMA'),
 ('CIRURGIA', 'SISTEMA'),
 ('EXAME_LABORATORIAL', 'SISTEMA'),
-('URGENCIA_EMERGENCIA', 'SISTEMA');
+('URGENCIA_EMERGENCIA', 'SISTEMA')
+ON CONFLICT (tiat_descricao) DO NOTHING;
 
+-- Garante que a coluna de referência existe na tabela de atendimentos
+ALTER TABLE atendimentos ADD COLUMN IF NOT EXISTS tiat_id BIGINT;
 
--- 2. Adiciona a nova coluna de FK
-ALTER TABLE atendimentos ADD CONSTRAINT fk_atendimentos_tipo FOREIGN KEY (tiat_id) REFERENCES tipo_atendimento (tiat_id);
+-- Adiciona a nova coluna de FK de forma segura
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_atendimentos_tipo') THEN
+        ALTER TABLE atendimentos 
+            ADD CONSTRAINT fk_atendimentos_tipo 
+            FOREIGN KEY (tiat_id) 
+            REFERENCES tipo_atendimento (tiat_id);
+    END IF;
+END $$;
 
 -- Define como obrigatória após a criação (assumindo que novos registros precisarão de um tipo)
 ALTER TABLE atendimentos ALTER COLUMN tiat_id SET NOT NULL;

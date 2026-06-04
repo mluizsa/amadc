@@ -1,4 +1,4 @@
-package com.ong.amadc.api.dto;
+package com.ong.amadc.api.dto.request;
 
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 import jakarta.validation.constraints.Email;

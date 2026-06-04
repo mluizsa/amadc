@@ -1,6 +1,6 @@
 package com.ong.amadc.api.controller;
 
-import com.ong.amadc.api.dto.LoginRequestDTO;
+import com.ong.amadc.api.dto.request.LoginRequestDTO;
 import com.ong.amadc.domain.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
