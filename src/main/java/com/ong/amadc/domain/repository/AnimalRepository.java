@@ -17,8 +17,10 @@ public interface AnimalRepository extends JpaRepository<AnimalEntidade, Long> {
            "(:porte IS NULL OR a.porte = :porte) AND " +
            "((:possivelAdocao IS NOT NULL AND a.possivelAdocao = :possivelAdocao) " +
            " OR (:possivelAdocao IS NULL AND a.possivelAdocao = true)) AND " +
-           "(:sexo IS NULL OR a.sexo = :sexo)")
+           "(:sexo IS NULL OR a.sexo = :sexo) AND " +
+           "(:nome IS NULL OR LOWER(a.nome) LIKE :nome)") // Corrigido para usar o parâmetro 'nome' já formatado
     Page<AnimalEntidade> findAllWithFilters(Pageable pageable,
+                                            @Param("nome") String nome,
                                             @Param("statusId") Long statusId,
                                             @Param("porte") String porte,
                                             @Param("possivelAdocao") Boolean possivelAdocao,

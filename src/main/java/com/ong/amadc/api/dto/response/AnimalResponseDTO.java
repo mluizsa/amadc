@@ -3,6 +3,7 @@ package com.ong.amadc.api.dto.response;
 import com.ong.amadc.domain.model.AnimalEntidade;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record AnimalResponseDTO(
@@ -30,7 +31,11 @@ public record AnimalResponseDTO(
     Long statusId,
     String statusDescricao,
     Boolean possivelAdocao,
-    String historia
+    String historia,
+    String registradoPor,
+    LocalDateTime dataCriacao,
+    String alteradoPor,
+    LocalDateTime dataAlteracao
 ) {
     public static AnimalResponseDTO fromEntity(AnimalEntidade entidade) {
         return new AnimalResponseDTO(
@@ -58,7 +63,11 @@ public record AnimalResponseDTO(
                 entidade.getStatus() != null ? entidade.getStatus().getId() : null,
                 entidade.getStatus() != null ? entidade.getStatus().getDescricao() : null,
                 entidade.getPossivelAdocao(),
-                entidade.getHistoria()
+                entidade.getHistoria(),
+                entidade.getRegistradoPor(),
+                entidade.getDataCriacao(),
+                entidade.getAlteradoPor(),
+                entidade.getDataAlteracao()
         );
     }
 }

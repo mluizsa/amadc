@@ -24,7 +24,7 @@ public class AnimalEntidade extends BaseEntity {
     @Column(name = "anim_id")
     private Long id;
 
-    @Column(name = "anim_nome", nullable = false)
+    @Column(name = "anim_nome", nullable = false, columnDefinition = "VARCHAR(255)")
     private String nome;
 
     @Column(name = "anim_especie")

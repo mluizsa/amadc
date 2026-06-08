@@ -24,7 +24,7 @@ public class VoluntarioController {
     private VoluntarioService service;
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_WRITE')")
     @Operation(summary = "Cadastrar voluntários",
             description = "Cadastro de voluntários na ONG")
     public ResponseEntity<VoluntarioEntidade> cadastrar(@RequestBody @Valid VoluntarioRequestDTO dto) {
@@ -33,7 +33,7 @@ public class VoluntarioController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_READ', 'ADMIN')")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_READ')")
     @Operation(summary = "Lista voluntários",
                description = "Lista ativos por padrão. Passe 'ativos=false' para ver os inativos.")
     public ResponseEntity<List<VoluntarioResponseDTO>> listar(
@@ -43,7 +43,7 @@ public class VoluntarioController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_READ', 'ADMIN')")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_READ')")
     @Operation(summary = "Voluntário por ID",
                description = "Busca e exibe os dados detalhados de um único voluntário pelo seu ID.")
     public ResponseEntity<VoluntarioResponseDTO> exibirVoluntario(
@@ -53,7 +53,7 @@ public class VoluntarioController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_WRITE')")
     @Operation(summary = "Edição do voluntário",
             description = "Edição de voluntários na ONG")
     public ResponseEntity<VoluntarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid VoluntarioRequestDTO dto) {
@@ -62,7 +62,7 @@ public class VoluntarioController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_WRITE')")
     @Operation(summary = "Exclusão de voluntário",
             description = "Exclusão lógica de voluntários na ONG")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {

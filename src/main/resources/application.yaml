@@ -18,6 +18,7 @@ spring:
     locations: classpath:db/migration
 logging:
   level:
+    org.hibernate.envers: WARN
     root: INFO
       # Silencia o bloco azul HHH10001005 (Informações da Database)
     org.hibernate.orm.connections.pooling: WARN
