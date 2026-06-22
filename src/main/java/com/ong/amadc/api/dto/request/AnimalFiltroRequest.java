@@ -9,5 +9,13 @@ public record AnimalFiltroRequest(
         @Parameter(description = "Indica se o animal está disponível para adoção",
             example = "true")
         Boolean possivelAdocao,
-        String sexo
-) {}
+        String sexo,
+        Boolean castrado
+) {
+        public String nomeParaLike() {
+                if (this.nome != null && !this.nome.isBlank()) {
+                        return "%" + this.nome.toLowerCase() + "%";
+                }
+                return null;
+        }
+}

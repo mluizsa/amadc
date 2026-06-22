@@ -132,6 +132,39 @@
                   </span>
                 </div>
 
+                <div class="col-md-6 mb-3">
+                  <label class="text-muted small d-block mb-0">STATUS DE CASTRAÇÃO</label>
+                  
+                  <!-- CORRIGIDO: mudou de v-v-if para v-if -->
+                  <span v-if="animal.castrado" class="badge badge-info shadow-sm">
+                    <i class="fa fa-check"></i> Castrado 
+                    
+                    <template v-if="!animal.dataCastracaoDesconhecida">
+                      ({{ formatarData(animal.dataCastracao) }})
+                    </template>
+                    
+                    <template v-else>
+                      (data desconhecida)
+                    </template>
+                  </span>
+                  
+                  <!-- CORRIGIDO: mudou de v-v-else para v-else -->
+                  <span v-else class="badge badge-secondary shadow-sm">
+                    <i class="fa fa-times"></i> Não Castrado
+                  </span>
+                </div>
+
+                <!--<div class="col-md-6 mb-3" v-if="animal.castrado">
+                  <label class="text-muted small d-block mb-0">DATA DA CASTRAÇÃO</label>
+                  <span v-if="animal.dataCastracaoDesconhecida" class="text-muted italic-text">
+                    Castrado (Data desconhecida)
+                  </span>
+                  <span v-else-if="animal.dataCastracao" class="text-dark font-weight-bold">
+                    {{ formatarData(animal.dataCastracao) }}
+                  </span>
+                  <span v-else class="text-muted">Não informada</span>
+                </div>-->
+
                 <div class="col-12 mb-3">
                   <label class="text-muted small d-block mb-0">PELAGEM (COR E TIPO)</label>
                   <span class="text-dark">{{ animal.pelagemCor || 'Não informada' }} {{ animal.pelagemTipo ? `(${animal.pelagemTipo})` : '' }}</span>
@@ -234,7 +267,7 @@ export default {
       try {
         if (typeof dataString === 'string' && dataString.includes('T')) {
           const apenasData = dataString.split('T')[0];
-          const [ano, mes, dia] =  apenasData.split('-');
+          const [ano, mes, dia] = apenasData.split('-');
           return `${dia}/${mes}/${ano}`;
         }
 
@@ -281,7 +314,6 @@ export default {
 </script>
 
 <style scoped>
-/* Efeito hover suave no novo botão Voltar */
 button.btn-outline-secondary:hover {
   background-color: #f8fafc !important;
   color: #333 !important;

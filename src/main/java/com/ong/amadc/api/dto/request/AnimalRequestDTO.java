@@ -56,6 +56,11 @@ public record AnimalRequestDTO(
     
     String microchip,
 
+    Boolean castrado,
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate dataCastracao,
+    Boolean dataCastracaoDesconhecida,
+
     @NotNull(message = "O status é obrigatório")
     Long statusId,
 

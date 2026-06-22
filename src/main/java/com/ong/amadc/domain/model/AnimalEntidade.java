@@ -81,7 +81,16 @@ public class AnimalEntidade extends BaseEntity {
 
     @Column(name = "anim_microchip")
     private String microchip;
-    
+
+    @Column(name = "anim_castrado")
+    private Boolean castrado = false; // Default para não castrado
+
+    @Column(name = "anim_data_castracao")
+    private LocalDate dataCastracao;
+
+    @Column(name = "anim_data_castracao_desconhecida")
+    private Boolean dataCastracaoDesconhecida = false; // Default para data conhecida
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stan_id", nullable = false)
     private StatusAnimalEntidade status;

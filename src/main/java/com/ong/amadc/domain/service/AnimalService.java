@@ -47,19 +47,15 @@ public class AnimalService {
     }
 
     public Page<AnimalResponseDTO> listarTodos(Pageable paginacao,AnimalFiltroRequest filtro) {
-        Boolean buscarAdotaveis = filtro.possivelAdocao() == null || filtro.possivelAdocao();
-        String likeNome = null;
-        if (filtro.nome() != null && !filtro.nome().isEmpty()) {
-            likeNome = "%" + filtro.nome().toLowerCase() + "%";
-        }
 
         return animalRepository.findAllWithFilters(
                 paginacao,
-                likeNome,
+                filtro.nomeParaLike(),
                 filtro.statusId(),
                 filtro.porte(),
-                buscarAdotaveis,
-                filtro.sexo()
+                filtro.possivelAdocao(),
+                filtro.sexo(),
+                filtro.castrado()
         ).map(AnimalResponseDTO::fromEntity);
     }
 
@@ -80,6 +76,7 @@ public class AnimalService {
     }
 
     public List<String> listarSexos() {
-        return Arrays.asList("MACHO", "FÊMEA");
+        return Arrays.asList("MACHO", "FEMEA");
     }
+
 }

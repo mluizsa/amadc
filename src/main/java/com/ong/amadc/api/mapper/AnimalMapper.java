@@ -34,12 +34,18 @@ public class AnimalMapper {
         animal.setPesoEntrada(request.pesoEntrada());
         animal.setCondicaoEntrada(request.condicaoEntrada());
         animal.setMicrochip(request.microchip());
-        animal.setPossivelAdocao(request.possivelAdocao());
+        animal.setDataCastracao(request.dataCastracao());
         animal.setHistoria(request.historia());
 
+        // PROTEÇÃO CONTRA NULOS: Garante consistência com os defaults da Entidade/Banco
+        animal.setCastrado(request.castrado() != null ? request.castrado() : false);
+        animal.setDataCastracaoDesconhecida(request.dataCastracaoDesconhecida() != null ? request.dataCastracaoDesconhecida() : false);
+        animal.setPossivelAdocao(request.possivelAdocao() != null ? request.possivelAdocao() : true);
+
+        // Busca e vincula o relacionamento ManyToOne do Status de forma segura
         if (request.statusId() != null) {
             StatusAnimalEntidade status = statusAnimalRepository.findById(request.statusId())
-                    .orElseThrow(() -> new RuntimeException("Status inválido"));
+                    .orElseThrow(() -> new IllegalArgumentException("Status com ID " + request.statusId() + " não foi localizado no sistema."));
             animal.setStatus(status);
         }
     }
