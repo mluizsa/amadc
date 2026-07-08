@@ -5,42 +5,50 @@ import com.ong.amadc.domain.model.AnimalEntidade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 public record AnimalResponseDTO(
-    Long id,
-    String nome,
-    String especie,
-    String raca,
-    String porte,
-    String sexo,
-    String idadeEstimada,
-    String pelagemCor,
-    String pelagemTipo,
-    String marcasCicatrizes,
-    LocalDate dataResgate,
-    LocalTime horaResgate,
-    String localResgateBairro,
-    String localResgateRua,
-    String localResgateReferencia,
-    String origem,
-    String resgatadorNome,
-    String resgatadorContato,
-    Double pesoEntrada,
-    String condicaoEntrada,
-    String microchip,
-    Boolean castrado,
-    LocalDate dataCastracao,
-    Boolean dataCastracaoDesconhecida,
-    Long statusId,
-    String statusDescricao,
-    Boolean possivelAdocao,
-    String historia,
-    String registradoPor,
-    LocalDateTime dataCriacao,
-    String alteradoPor,
-    LocalDateTime dataAlteracao
+        Long id,
+        String nome,
+        String especie,
+        String raca,
+        String porte,
+        String sexo,
+        String idadeEstimada,
+        String pelagemCor,
+        String pelagemTipo,
+        String marcasCicatrizes,
+        LocalDate dataResgate,
+        LocalTime horaResgate,
+        String localResgateBairro,
+        String localResgateRua,
+        String localResgateReferencia,
+        String origem,
+        String resgatadorNome,
+        String resgatadorContato,
+        Double pesoEntrada,
+        String condicaoEntrada,
+        String microchip,
+        Boolean castrado,
+        LocalDate dataCastracao,
+        Boolean dataCastracaoDesconhecida,
+        Long statusId,
+        String statusDescricao,
+        Boolean possivelAdocao,
+        String historia,
+        String registradoPor,
+        LocalDateTime dataCriacao,
+        String alteradoPor,
+        LocalDateTime dataAlteracao,
+
+        // 🆕 Campos de Mídia adicionados ao Record
+        String urlFotoCapa,
+        List<FotoGaleriaResponseDTO> fotosGaleria
 ) {
-    public static AnimalResponseDTO fromEntity(AnimalEntidade entidade) {
+    public static AnimalResponseDTO fromEntity(
+            AnimalEntidade entidade,
+            String urlFotoCapa,
+            List<FotoGaleriaResponseDTO> fotosGaleria) {
         return new AnimalResponseDTO(
                 entidade.getId(),
                 entidade.getNome(),
@@ -73,7 +81,11 @@ public record AnimalResponseDTO(
                 entidade.getRegistradoPor(),
                 entidade.getDataCriacao(),
                 entidade.getAlteradoPor(),
-                entidade.getDataAlteracao()
+                entidade.getDataAlteracao(),
+
+                // 🆕 Passando as mídias para o construtor
+                urlFotoCapa,
+                fotosGaleria
         );
     }
 }

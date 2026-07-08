@@ -1,3 +1,5 @@
+server:
+  connection-timeout: 60000
 spring:
   application:
     name: amadc
@@ -16,6 +18,10 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  servlet:
+    multipart:
+     max-file-size: 10MB
+     max-request-size: 50MB
 logging:
   level:
     org.hibernate.envers: WARN

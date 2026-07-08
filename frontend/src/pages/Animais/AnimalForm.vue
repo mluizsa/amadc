@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-12">
           <card class="shadow-sm border-0 bg-white" style="border-radius: 8px;">
-            
+
             <template slot="header">
               <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
@@ -23,11 +23,11 @@
 
             <div v-if="loading" class="text-center p-5">
               <div class="spinner-border text-info my-3" role="status"></div>
-              <p class="text-muted font-weight-600">Processando informações...</p>
+              <p class="text-muted font-weight-600">{{ textoLoading }}</p>
             </div>
 
             <div v-else class="p-2">
-              
+
               <div class="stepper-wrapper mb-4">
                 <div class="stepper-item" :class="{ 'active': etapaAtual === 1, 'completed': etapaAtual > 1 }">
                   <div class="step-counter">1</div>
@@ -48,10 +48,10 @@
               </div>
 
               <form @submit.prevent="avancarOuSalvar">
-                
+
                 <div v-if="etapaAtual === 1" class="step-content-fade">
                   <h5 class="text-dark font-weight-bold mb-3 section-step-title">1. Identificação Básica</h5>
-                  
+
                   <div class="row">
                     <div class="col-12 col-md-4 mb-3">
                       <label class="control-label font-weight-bold mb-1 shadow-label">Nome do Animal *</label>
@@ -113,7 +113,7 @@
 
                 <div v-if="etapaAtual === 2" class="step-content-fade">
                   <h5 class="text-dark font-weight-bold mb-3 section-step-title">2. Prontuário & Saúde</h5>
-                  
+
                   <div class="row">
                     <div class="col-12 col-md-4 mb-3">
                       <label class="control-label font-weight-bold mb-1 shadow-label">Condição de Entrada</label>
@@ -180,7 +180,7 @@
 
                 <div v-if="etapaAtual === 3" class="step-content-fade">
                   <h5 class="text-dark font-weight-bold mb-3 section-step-title">3. Dados do Resgate</h5>
-                  
+
                   <div class="row">
                     <div class="col-12 col-md-4 mb-3">
                       <label class="control-label font-weight-bold mb-1 shadow-label">Data do Resgate *</label>
@@ -229,8 +229,8 @@
                 </div>
 
                 <div v-if="etapaAtual === 4" class="step-content-fade">
-                  <h5 class="text-dark font-weight-bold mb-3 section-step-title">4. História do Animal</h5>
-                  
+                  <h5 class="text-dark font-weight-bold mb-3 section-step-title">4. História e Galeria de Fotos</h5>
+
                   <div class="row mb-3">
                     <div class="col-12 d-flex align-items-center">
                       <div class="custom-control custom-checkbox bg-light p-3 rounded border w-100 pl-5">
@@ -243,9 +243,57 @@
                   </div>
 
                   <div class="row">
-                    <div class="col-12 mb-3">
+                    <div class="col-12 mb-4">
                       <label class="control-label font-weight-bold mb-1 shadow-label">Biografia / Histórico de Vida</label>
-                      <textarea v-model="animal.historia" rows="5" placeholder="Conte um pouco sobre o temperamento dele e detalhes do recolhimento..." class="form-control custom-textarea-form"></textarea>
+                      <textarea v-model="animal.historia" rows="4" placeholder="Conte um pouco sobre o temperamento dele e detalhes do recolhimento..." class="form-control custom-textarea-form"></textarea>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-12">
+                      <label class="control-label font-weight-bold mb-2 shadow-label text-dark">Fotos da Linha do Tempo / Evolução</label>
+
+                      <div
+                        class="dropzone-area text-center p-4 border rounded"
+                        @dragover.prevent="dragover = true"
+                        @dragleave="dragover = false"
+                        @drop.prevent="tratarDropFotos"
+                        :class="{ 'dropzone-active': dragover }"
+                        @click="$refs.inputFotos.click()"
+                      >
+                        <input
+                          type="file"
+                          ref="inputFotos"
+                          multiple
+                          accept="image/*"
+                          class="d-none"
+                          @change="tratarSelecaoFotos"
+                        >
+                        <i class="fa fa-cloud-upload text-info fa-3x mb-2"></i>
+                        <h6 class="font-weight-bold mb-1 text-dark">Clique ou arraste as fotos aqui</h6>
+                        <p class="text-muted small mb-0">Formatos permitidos: JPG, PNG (Máx 10MB por foto)</p>
+                      </div>
+
+                      <div v-if="previewFotos.length > 0" class="row mt-3 row-gap-3">
+                        <div
+                          v-for="(foto, index) in previewFotos"
+                          :key="index"
+                          class="col-6 col-sm-4 col-md-3 col-lg-2 position-relative target-preview-box"
+                        >
+                          <div class="card m-0 p-1 border shadow-sm rounded-lg overflow-hidden box-preview-img">
+                            <img :src="foto.url" class="img-fluid rounded image-cover-preview" alt="Preview">
+                            <button
+                              type="button"
+                              class="btn btn-danger btn-circle btn-sm position-absolute btn-remove-preview"
+                              @click.stop="removerFotoFila(index)"
+                              title="Remover Foto"
+                            >
+                              <i class="fa fa-times"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
@@ -295,11 +343,14 @@ export default {
     return {
       etapaAtual: 1,
       loading: false,
+      textoLoading: "Processando informações...",
       isEdit: false,
+      dragover: false,
       listaStatus: [],
-      // Objetos locais para a UI manipular data e hora de forma isolada
+      filaArquivos: [], // Mantém os objetos File binários originais para o upload
+      previewFotos: [], // Mantém os ObjectURLs locais para renderizar na tela
       uiResgate: {
-        data: new Date().toISOString().split('T')[0], // Começa com a data de hoje padrão
+        data: new Date().toISOString().split('T')[0],
         hora: "00:00:00"
       },
       animal: {
@@ -332,6 +383,23 @@ export default {
       }
     }
   },
+  mounted() {
+    // 1. Carrega os dados dos selects (Status, etc.)
+    this.carregarCombosForm();
+
+    // 2. Verifica se existe um ID vindo na URL da rota (ex: /admin/animais/editar/12)
+    const idAnimal = this.$route.params.id;
+
+    if (idAnimal) {
+      this.isEdit = true;
+      this.animal.id = idAnimal;
+      // 3. Dispara a busca no Back-end para preencher a tela
+      this.buscarAnimal(idAnimal);
+    } else {
+      this.isEdit = false;
+    }
+  },
+
   methods: {
     avancarOuSalvar() {
       if (this.etapaAtual < 4) {
@@ -353,6 +421,35 @@ export default {
         window.scrollTo(0, 0);
       }
     },
+
+    // 📸 MÉTODOS DE MANIPULAÇÃO DE IMAGENS
+    tratarSelecaoFotos(e) {
+      const arquivos = Array.from(e.target.files);
+      this.gerarPreviews(arquivos);
+    },
+    tratarDropFotos(e) {
+      this.dragover = false;
+      const arquivos = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+      this.gerarPreviews(arquivos);
+    },
+    gerarPreviews(arquivos) {
+      arquivos.forEach(arquivo => {
+        this.filaArquivos.push(arquivo);
+        this.previewFotos.push({
+          nome: arquivo.name,
+          url: URL.createObjectURL(arquivo) // Cria o link em memória para a tag <img>
+        });
+      });
+      // Limpa o input file nativo para poder selecionar o mesmo arquivo novamente se necessário
+      if (this.$refs.inputFotos) this.$refs.inputFotos.value = '';
+    },
+    removerFotoFila(index) {
+      // Evita vazamento de memória revogando a URL local
+      URL.revokeObjectURL(this.previewFotos[index].url);
+      this.previewFotos.splice(index, 1);
+      this.filaArquivos.splice(index, 1);
+    },
+
     async carregarCombosForm() {
       try {
         const [resStatus] = await axios.all([
@@ -368,9 +465,8 @@ export default {
       try {
         const response = await axios.get(`/api/animais/${id}`);
         if (response.data) {
-          // Faz o bind dos dados recebidos do DTO para a UI
           this.animal = { ...this.animal, ...response.data };
-          
+
           if (response.data.dataResgate) {
             this.uiResgate.data = response.data.dataResgate;
           }
@@ -399,74 +495,114 @@ export default {
         this.animal.dataCastracao = null;
       }
     },
-    async salvarAnimalFinal() {
-      if (!this.uiResgate.data) {
-        alert("A data de resgate da Etapa 3 é obrigatória!");
-        this.etapaAtual = 3;
-        return;
-      }
 
-      this.loading = true;
-      try {
-        const payload = { ...this.animal };
-        
-        // Acopla os campos de data e hora formatados como o DTO exige
-        payload.dataResgate = this.uiResgate.data;
-        
-        // Garante que a hora possua os segundos (HH:mm:ss) exigido pelo Spring
-        if (this.uiResgate.hora) {
-          payload.horaResgate = this.uiResgate.hora.length === 5 ? `${this.uiResgate.hora}:00` : this.uiResgate.hora;
-        } else {
-          payload.horaResgate = null;
+    // 🚀 SALVAMENTO CONCATENADO (TEXTO + ARRAYS DE ARQUIVOS)
+    async salvarAnimalFinal(){
+        // Lógica de validação inicial (fora do try/catch para falha rápida)
+        if (!this.uiResgate.data) {
+            alert("A data de resgate da Etapa 3 é obrigatória!");
+            this.etapaAtual = 3;
+            return;
         }
 
-        // Garante o envio explícito dos booleanos novos mapeados na Entidade/DTO
-        payload.castrado = this.animal.castrado === true;
-        payload.dataCastracaoDesconhecida = this.animal.dataCastracaoDesconhecida === true;
-        payload.possivelAdocao = this.animal.possivelAdocao === true;
+        this.loading = true;
+        this.textoLoading = "Salvando dados cadastrais da ficha...";
 
-        // Limpa strings vazias substituindo por null
-        Object.keys(payload).forEach(key => {
-          if (typeof payload[key] === 'string' && !payload[key].trim()) {
-            payload[key] = null;
-          }
-        });
+        try {
+            // Crie o payload principal AQUI
+            const payload = {...this.animal};
 
-        if (this.isEdit) {
-          await axios.put(`/api/animais/${this.animal.id}`, payload);
-        } else {
-          await axios.post('/api/animais', payload);
+            // Lógica para data e hora de resgate
+            payload.dataResgate = this.uiResgate.data;
+            if (this.uiResgate.hora) {
+                payload.horaResgate = this.uiResgate.hora.length === 5 ? `${this.uiResgate.hora}:00` : this.uiResgate.hora;
+            } else {
+                payload.horaResgate = null;
+            }
+
+            // Lógica para booleanos
+            payload.castrado = this.animal.castrado === true;
+            payload.dataCastracaoDesconhecida = this.animal.dataCastracaoDesconhecida === true;
+            payload.possivelAdocao = this.animal.possivelAdocao === true;
+
+            // Lógica para limpar strings vazias
+            Object.keys(payload).forEach(key => {
+                if (typeof payload[key] === 'string' && !payload[key].trim()) {
+                    payload[key] = null;
+                }
+            });
+
+            // --- PONTO DE AJUSTE PARA fotosGaleria (AGORA NO LOCAL CORRETO) ---
+            // Assumindo que this.animal.fotosGaleria pode conter objetos { url: '...' }
+            // ou strings '...' (se já vier do backend)
+            if (payload.fotosGaleria && Array.isArray(payload.fotosGaleria)) {
+                payload.fotosGaleria = payload.fotosGaleria.map(foto => {
+                    // Se 'foto' já for uma string (URL), retorne-a diretamente
+                    if (typeof foto === 'string') {
+                        return foto;
+                    }
+                    // Se 'foto' for um objeto e tiver uma propriedade 'url', use-a
+                    if (typeof foto === 'object' && foto !== null && foto.url) {
+                        return foto.url;
+                    }
+                    // Caso contrário, retorne null ou uma string vazia, ou trate como erro
+                    return null;
+                }).filter(url => url !== null); // Remova quaisquer entradas nulas
+            }
+            // --- FIM DO PONTO DE AJUSTE ---
+
+
+            let animalIdResultante = this.animal.id;
+
+            // 1. Persiste a entidade texto primeiro
+            if (this.isEdit) {
+                await axios.put(`/api/animais/${this.animal.id}`, payload);
+            } else {
+                const resNovo = await axios.post('/api/animais', payload);
+                // Certifique-se de que seu back retorna a entidade criada com o ID gerado
+                if (resNovo.data && resNovo.data.id) {
+                    animalIdResultante = resNovo.data.id;
+                }
+            }
+
+            // 2. Se houver fotos na fila, executa o upload em lote de forma sequencial/síncrona
+            if (this.filaArquivos.length > 0 && animalIdResultante) {
+                this.textoLoading = `Enviando lote de fotos (${this.filaArquivos.length}) para a nuvem física...`;
+
+                const formData = new FormData();
+                formData.append("tipoVinculo", "ANIMAL_EVOLUCAO");
+
+                // Preenche o array usando exatamente a chave "fotos" mapeada no Controller
+                this.filaArquivos.forEach(arquivo => {
+                    formData.append("fotos", arquivo);
+                });
+
+                await axios.post(`/api/arquivos/animal/${animalIdResultante}/upload`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+            }
+
+            this.$router.push('/admin/animais');
+        } catch (error) {
+            console.error("Erro na comunicação com servidor:", error);
+            let mensagemErro = "Erro ao processar dados ou arquivos. Verifique os limites de tamanho.";
+            if (error.response && error.response.data && error.response.data.message) {
+                mensagemErro = error.response.data.message;
+            }
+            alert(mensagemErro);
+        } finally {
+            this.loading = false;
+            this.textoLoading = "Processando informações...";
         }
-        
-        this.$router.push('/admin/animais');
-      } catch (error) {
-        // CORRIGIDO: Removido o System.out.println que quebrava o fluxo
-        console.error("Erro na comunicação com servidor:", error);
-        
-        let mensagemErro = "Erro de validação ao salvar a ficha. Verifique as informações.";
-        if (error.response && error.response.data && error.response.data.message) {
-          mensagemErro = error.response.data.message;
-        }
-        
-        alert(mensagemErro);
-      } finally {
-        this.loading = false;
-      }
-    }
-  },
-  async mounted() {
-    await this.carregarCombosForm();
-    const id = this.$route.params.id;
-    if (id) {
-      this.isEdit = true;
-      this.buscarAnimal(id);
     }
   }
 }
 </script>
 
 <style scoped>
-/* Mantido as mesmas estilizações do Stepper e transições */
+/* Estilizações do Stepper e transições */
 .stepper-wrapper { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; }
 .stepper-wrapper::before { content: ""; position: absolute; top: 18px; left: 0; width: 100%; height: 3px; background-color: #f3f3f3; z-index: 1; }
 .stepper-item { position: relative; display: flex; flex-direction: column; align-items: center; flex: 1; z-index: 2; }
@@ -484,4 +620,46 @@ export default {
 .style-action-btn { height: 42px; border-radius: 4px; }
 .custom-checkbox .custom-control-input:checked ~ .custom-control-label::before { background-color: #23ccef !important; border-color: #23ccef !important; }
 .gap-2 { gap: 0.5rem; }
+.row-gap-3 { row-gap: 1rem; }
+
+/* 🎨 Estilo Exclusivo da Dropzone / Preview de Fotos */
+.dropzone-area {
+  border: 2px dashed #23ccef !important;
+  background-color: #fcfdfe;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-radius: 6px;
+}
+.dropzone-area:hover, .dropzone-active {
+  background-color: #f0faff;
+  border-color: #17a2b8 !important;
+}
+.box-preview-img {
+  height: 120px;
+  background-color: #f8f9fa;
+  position: relative;
+}
+.image-cover-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.btn-remove-preview {
+  top: -5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 22px;
+  text-align: center;
+  font-size: 10px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.btn-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>

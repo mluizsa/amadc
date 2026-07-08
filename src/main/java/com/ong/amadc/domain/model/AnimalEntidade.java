@@ -101,7 +101,13 @@ public class AnimalEntidade extends BaseEntity {
     @Column(name = "anim_historia", columnDefinition = "TEXT")
     private String historia;
 
+    // 🆕 CAMPO ADICIONADO: Mantém o link direto para a foto principal da capa
+    @Column(name = "anim_url_foto_capa", length = 500)
+    private String urlFotoCapa;
+
     @NotAudited
     @OneToMany(mappedBy = "animal", cascade = CascadeType.ALL)
     private List<AtendimentoEntidade> prontuario = new ArrayList<>();
+
+
 }

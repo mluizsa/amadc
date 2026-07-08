@@ -1,0 +1,1 @@
+ALTER TABLE arquivos_sistema ADD COLUMN IF NOT EXISTS arq_is_capa BOOLEAN DEFAULT FALSE;

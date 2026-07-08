@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/animais")
@@ -83,5 +84,22 @@ public class AnimalController {
             @PathVariable Long id,
             @RequestBody AnimalRequestDTO animalRequest) {
         return ResponseEntity.ok(animalService.atualizar(id, animalRequest));
+    }
+
+    @PatchMapping("/{id}/definir-capa")
+    @PreAuthorize("hasPermission(null, 'ANIMAL_WRITE')")
+    @Operation(summary = "Definir foto de capa do animal",
+            description = "Marca um arquivo específico como capa oficial e atualiza o atalho na tabela de animais")
+    public ResponseEntity<Void> definirFotoComoCapa(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> payload) {
+
+        Long arquivoId = payload.get("arquivoId");
+        if (arquivoId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        animalService.definirFotoComoCapa(id, arquivoId);
+        return ResponseEntity.noContent().build();
     }
 }

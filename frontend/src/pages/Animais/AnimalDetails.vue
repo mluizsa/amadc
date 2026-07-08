@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <div class="container-fluid">
-      
+
       <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center flex-wrap">
           <div>
@@ -11,16 +11,16 @@
             <h3 class="m-0 text-dark font-weight-bold">Ficha de {{ animal.nome || 'Carregando...' }}</h3>
             <p class="text-muted mb-0">Visualização completa do prontuário e histórico de resgate</p>
           </div>
-          
+
           <div class="text-right d-flex align-items-center" v-if="animal.statusId && animal.statusDescricao">
-            <span class="badge badge-lg p-3 text-uppercase shadow-sm" 
-                  :class="statusClass(animal.statusDescricao)" 
+            <span class="badge badge-lg p-3 text-uppercase shadow-sm"
+                  :class="statusClass(animal.statusDescricao)"
                   style="font-size: 13px; letter-spacing: 0.5px; border-radius: 6px;">
-                {{ animal.statusDescricao.replace(/_/g, ' ') }} 
+              {{ formatarStatusTexto(animal.statusDescricao) }}
             </span>
           </div>
           <div class="text-right d-flex align-items-center" v-else-if="!loading">
-            <span class="badge badge-secondary badge-lg p-3 shadow-sm" 
+            <span class="badge badge-secondary badge-lg p-3 shadow-sm"
                   style="font-size: 13px; border-radius: 6px;">
               SEM STATUS
             </span>
@@ -28,282 +28,405 @@
         </div>
       </div>
 
-      <div v-if="loading" class="text-center p-5">
-        <div class="spinner-border text-info" role="status"></div>
-        <p class="mt-2 text-muted">Carregando ficha clínica do animal...</p>
+      <div v-if="loading" class="text-center p-5 bg-white rounded shadow-sm">
+        <div class="spinner-border text-info my-3" role="status"></div>
+        <p class="text-muted font-weight-600">Buscando o prontuário completo do animal...</p>
       </div>
 
       <div v-else class="row">
-        
-        <div class="col-12 col-md-4">
-          <card class="card-user text-center shadow-sm">
-            <div class="p-4">
-              <div class="avatar shadow mb-3 bg-light d-inline-flex align-items-center justify-content-center" style="width: 110px; height: 110px; border-radius: 50%;">
-                <i class="fa fa-paw fa-4x text-muted"></i>
-              </div>
-              <h4 class="title text-dark font-weight-bold mb-1">{{ animal.nome }}</h4>
-              <p class="text-muted small mb-3">ID do Registro: #{{ animal.id }}</p>
-              
-              <ul class="list-group list-group-flush text-left" style="font-size: 13px;">
-                <li class="list-group-item d-flex justify-content-between px-1">
-                  <span><b>Espécie:</b></span> <span>{{ animal.especie }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between px-1">
-                  <span><b>Raça:</b></span> <span class="text-muted">{{ animal.raca || 'Sem raça definida' }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between px-1">
-                  <span><b>Sexo:</b></span> 
-                  <span>
-                    <i :class="animal.sexo === 'MACHO' ? 'fa fa-mars text-info' : 'fa fa-venus text-danger'"></i>
-                    {{ animal.sexo | capitalizar }}
-                  </span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between px-1">
-                  <span><b>Porte:</b></span> <span>{{ animal.porte | capitalizar }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between px-1">
-                  <span><b>Idade Estimada:</b></span> <span>{{ animal.idadeEstimada || 'Não informada' }}</span>
-                </li>
-              </ul>
 
-              <button @click="$router.push(`/admin/animais/editar/${animal.id}`)" class="btn btn-warning btn-fill btn-block mt-4 shadow">
-                <i class="fa fa-edit"></i> Editar Cadastro
-              </button>
+        <div class="col-12 col-lg-4 mb-4">
+          <div class="card card-user border-0 shadow-sm bg-white" style="border-radius: 8px; overflow: hidden;">
+            <div class="image-cover-header position-relative">
+              <div class="overlay-gradient-pet"></div>
             </div>
-          </card>
-        </div>
 
-        <div class="col-12 col-md-8">
-          <div class="nav-tabs-navigation">
-            <div class="nav-tabs-wrapper">
-              <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                  <a class="nav-link" :class="{ active: tabAtiva === 'clinico' }" @click.prevent="tabAtiva = 'clinico'" href="#">
-                    <i class="fa fa-heartbeat"></i> Prontuário & Saúde
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" :class="{ active: tabAtiva === 'resgate' }" @click.prevent="tabAtiva = 'resgate'" href="#">
-                    <i class="fa fa-ambulance"></i> Dados do Resgate
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" :class="{ active: tabAtiva === 'historico' }" @click.prevent="tabAtiva = 'historico'" href="#">
-                    <i class="fa fa-history"></i> História do Animal
-                  </a>
-                </li>
-              </ul>
+            <div class="content text-center position-relative px-3" style="margin-top: -65px; padding-bottom: 25px;">
+              <div class="author">
+                    <a href="#">
+                      <!-- Adicione a imagem do animal aqui -->
+                      <img v-if="animal.urlFotoCapa" class="avatar border-gray" :src="formatarUrlImagem(animal.urlFotoCapa)" :alt="animal.nome">
+                      <!-- Opcional: uma imagem placeholder se não houver foto principal -->
+                      <img v-else class="avatar border-gray" :src="formatarUrlImagem('/uploads/img/placeholder-animal.png')" alt="Animal Placeholder">
+                    </a>
+                    <h4 class="title">{{ animal.nome }}</h4>
+                <p class="text-muted small font-weight-600 mb-3" style="letter-spacing: 0.3px;">
+                  RACA: {{ animal.raca || 'N/I' }} | PORTE: {{ animal.porte || 'N/I' }}
+                </p>
+              </div>
+
+              <hr class="my-3" style="border-top: 1px solid #f1f5f9;">
+
+              <div class="row text-left px-2">
+                <div class="col-6 mb-2">
+                  <small class="text-uppercase text-secondary font-weight-bold block-label">Espécie</small>
+                  <p class="m-0 text-dark font-weight-600 font-size-14">{{ animal.especie || 'Não informada' }}</p>
+                </div>
+                <div class="col-6 mb-2">
+                  <small class="text-uppercase text-secondary font-weight-bold block-label">Sexo</small>
+                  <p class="m-0 text-dark font-weight-600 font-size-14">{{ animal.sexo || 'Não informado' }}</p>
+                </div>
+                <div class="col-6 mb-2">
+                  <small class="text-uppercase text-secondary font-weight-bold block-label">Idade Estimada</small>
+                  <p class="m-0 text-dark font-weight-600 font-size-14">{{ animal.idadeEstimada || 'Não cadastrada' }}</p>
+                </div>
+                <div class="col-6 mb-2">
+                  <small class="text-uppercase text-secondary font-weight-bold block-label">Microchip</small>
+                  <p class="m-0 text-dark font-weight-600 font-size-14 text-truncate" :title="animal.microchip">{{ animal.microchip || 'Sem chip' }}</p>
+                </div>
+              </div>
+
+              <div class="bg-light rounded p-2 mt-2 text-left border">
+                <small class="text-uppercase text-secondary font-weight-bold block-label px-1">Pelagem</small>
+                <p class="m-0 text-dark font-size-13 px-1 font-weight-500">
+                  {{ animal.pelagemCor || 'Cor não definida' }} ({{ animal.pelagemTipo || 'Tipo não definido' }})
+                </p>
+              </div>
             </div>
           </div>
+        </div>
 
-          <card class="mt-2 border-top-0 shadow-sm" style="border-top-left-radius: 0; border-top-right-radius: 0;">
-            
-            <div v-if="tabAtiva === 'clinico'" class="tab-pane-content">
-              <h5 class="text-info mb-3 font-weight-bold">Acompanhamento Clínico</h5>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">CONDIÇÃO DE ENTRADA</label>
-                  <span class="text-dark font-weight-bold">{{ animal.condicaoEntrada || 'Não informada' }}</span>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">PESO NA ENTRADA</label>
-                  <span class="text-dark font-weight-bold">{{ animal.pesoEntrada ? `${animal.pesoEntrada} kg` : 'Não registrado' }}</span>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">NÚMERO DO MICROCHIP</label>
-                  <span class="badge badge-secondary shadow-sm" style="font-size: 12px;">{{ animal.microchip || 'Não possui' }}</span>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">PRONTO PARA ADOÇÃO?</label>
-                  
-                  <span v-if="animal.statusDescricao && ['RESGATADO', 'EM_TRATAMENTO', 'QUARENTENA', 'FALECIDO'].includes(animal.statusDescricao.toUpperCase())" 
-                        class="badge badge-danger shadow-sm">
-                    Não / Em Triagem ou Tratamento
-                  </span>
-
-                  <span v-else-if="animal.statusDescricao && animal.statusDescricao.toUpperCase() === 'ADOTADO'" 
-                        class="badge badge-success shadow-sm">
-                    Já Adotado!
-                  </span>
-
-                  <span v-else class="badge shadow-sm" :class="animal.possivelAdocao ? 'badge-success' : 'badge-danger'">
-                    {{ animal.possivelAdocao ? 'Sim, Disponível' : 'Não / Indisponível' }}
-                  </span>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">STATUS DE CASTRAÇÃO</label>
-                  
-                  <!-- CORRIGIDO: mudou de v-v-if para v-if -->
-                  <span v-if="animal.castrado" class="badge badge-info shadow-sm">
-                    <i class="fa fa-check"></i> Castrado 
-                    
-                    <template v-if="!animal.dataCastracaoDesconhecida">
-                      ({{ formatarData(animal.dataCastracao) }})
-                    </template>
-                    
-                    <template v-else>
-                      (data desconhecida)
-                    </template>
-                  </span>
-                  
-                  <!-- CORRIGIDO: mudou de v-v-else para v-else -->
-                  <span v-else class="badge badge-secondary shadow-sm">
-                    <i class="fa fa-times"></i> Não Castrado
-                  </span>
-                </div>
-
-                <!--<div class="col-md-6 mb-3" v-if="animal.castrado">
-                  <label class="text-muted small d-block mb-0">DATA DA CASTRAÇÃO</label>
-                  <span v-if="animal.dataCastracaoDesconhecida" class="text-muted italic-text">
-                    Castrado (Data desconhecida)
-                  </span>
-                  <span v-else-if="animal.dataCastracao" class="text-dark font-weight-bold">
-                    {{ formatarData(animal.dataCastracao) }}
-                  </span>
-                  <span v-else class="text-muted">Não informada</span>
-                </div>-->
-
-                <div class="col-12 mb-3">
-                  <label class="text-muted small d-block mb-0">PELAGEM (COR E TIPO)</label>
-                  <span class="text-dark">{{ animal.pelagemCor || 'Não informada' }} {{ animal.pelagemTipo ? `(${animal.pelagemTipo})` : '' }}</span>
-                </div>
-                <div class="col-12 mb-3" v-if="animal.marcasCicatrizes">
-                  <label class="text-muted small d-block mb-0">MARCAS OU CICATRIZES</label>
-                  <span class="text-dark text-justify">{{ animal.marcasCicatrizes }}</span>
-                </div>
-              </div>
+        <div class="col-12 col-lg-8 mb-4">
+          <div class="card border-0 shadow-sm bg-white" style="border-radius: 8px; min-height: 485px;">
+            <div class="card-header bg-white pb-0 border-0 pt-3 px-3">
+              <ul class="nav nav-tabs border-bottom-0 gap-1" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'historico' }" @click="activeTab = 'historico'">
+                    <i class="fa fa-history mr-1"></i> Histórico
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'clinica' }" @click="activeTab = 'clinica'">
+                    <i class="fa fa-file-text-o mr-1"></i> Ficha Clínica
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'vacinas' }" @click="activeTab = 'vacinas'">
+                    <i class="fa fa-shield mr-1"></i> Vacinas
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'medicamentos' }" @click="activeTab = 'medicamentos'">
+                    <i class="fa fa-flask mr-1"></i> Medicamentos
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'galeria' }" @click="activeTab = 'galeria'">
+                    <i class="fa fa-camera mr-1"></i> Galeria de Fotos
+                  </a>
+                </li>
+              </ul>
             </div>
 
-            <div v-if="tabAtiva === 'resgate'" class="tab-pane-content">
-              <h5 class="text-warning mb-3 font-weight-bold">Informações sobre o Recolhimento</h5>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">ORIGEM DO RESGATE</label>
-                  <span class="text-dark font-weight-bold">{{ animal.origem || 'Não informada' }}</span>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">DATA / HORA DO RESGATE</label>
-                  <span class="text-dark">{{ animal.dataResgate ? formatarData(animal.dataResgate) : 'Não informada' }} <span v-if="animal.horaResgate">às {{ animal.horaResgate }}</span></span>
-                </div>
-                <div class="col-12 mb-3">
-                  <label class="text-muted small d-block mb-0">ENDEREÇO / LOCAL DE RESGATE</label>
-                  <span class="text-dark d-block"><b>Bairro:</b> {{ animal.localResgateBairro || 'Não informado' }}</span>
-                  <span class="text-dark d-block" v-if="animal.localResgateRua"><b>Rua:</b> {{ animal.localResgateRua }}</span>
-                  <span class="text-muted small d-block" v-if="animal.localResgateReferencia"><b>Referência:</b> {{ animal.localResgateReferencia }}</span>
-                </div>
-                <div class="col-12"><hr class="my-3"></div>
-                <div class="col-md-6 mb-3">
-                  <label class="text-muted small d-block mb-0">NOME DO RESGATADOR</label>
-                  <span class="text-dark">{{ animal.resgatadorNome || 'Anônimo / Não informado' }}</span>
-                </div>
-                <div class="col-md-6 mb-3" v-if="animal.resgatadorContato">
-                  <label class="text-muted small d-block mb-0">CONTATO DO RESGATADOR</label>
-                  <span class="text-dark"><i class="fa fa-phone text-muted mr-1"></i> {{ animal.resgatadorContato }}</span>
-                </div>
-              </div>
-            </div>
+            <div class="card-body p-4 tab-content">
 
-            <div v-if="tabAtiva === 'historico'" class="tab-pane-content">
-              <h5 class="text-success mb-3 font-weight-bold">Biografia e Histórico de Vida</h5>
-              <div class="p-3 bg-light rounded text-justify text-secondary mb-4 shadow-inner" style="font-style: italic; line-height: 1.6;">
-                "{{ animal.historia || 'Nenhuma história descrita para este animal.' }}"
-              </div>
-              
-              <h6 class="text-muted font-weight-bold mb-2 small" style="letter-spacing: 0.5px;">LOG DE AUDITORIA INTERNA</h6>
-              <div class="p-3 border rounded small bg-white shadow-sm">
-                <p class="mb-1 text-dark"><b>Cadastrado por:</b> {{ animal.registradoPor || 'Sistema' }} em {{ formatarData(animal.dataCriacao) }}</p>
-                <p class="m-0 text-dark" v-if="animal.alteradoPor"><b>Última modificação por:</b> {{ animal.alteradoPor }} em {{ formatarData(animal.dataAlteracao) }}</p>
-              </div>
-            </div>
+              <div v-if="activeTab === 'historico'" class="tab-pane-fade">
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2">Biografia & Origem</h5>
+                <p class="text-dark font-weight-500 bg-light p-3 rounded border text-justify style-biografia-text" v-if="animal.historia">
+                  "{{ animal.historia }}"
+                </p>
+                <p class="text-muted italic bg-light p-3 rounded border text-center mb-4" v-else>
+                  Nenhuma biografia ou detalhe comportamental preenchido para este animal.
+                </p>
 
-          </card>
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2 mt-4">Dados Técnicos do Resgate</h5>
+                <div class="row">
+                  <div class="col-12 col-md-6 mb-3">
+                    <small class="text-muted font-weight-bold d-block mb-1">DATA E HORA DO REGISTRO</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-calendar text-info mr-2"></i>{{ formatarData(animal.dataResgate) }} às {{ animal.horaResgate || 'Horário N/I' }}
+                    </p>
+                  </div>
+                  <div class="col-12 col-md-6 mb-3">
+                    <small class="text-muted font-weight-bold d-block mb-1">ORIGEM RECOLHIMENTO</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-map-signs text-info mr-2"></i>{{ animal.origem || 'Não especificada' }}
+                    </p>
+                  </div>
+                  <div class="col-12 mb-3">
+                    <small class="text-muted font-weight-bold d-block mb-1">LOCAL EXATO DA OCORRÊNCIA</small>
+                    <div class="bg-light border p-2 rounded text-dark font-weight-600">
+                      <i class="fa fa-map-marker text-danger mr-2"></i>
+                      <span>Rua: {{ animal.localResgateRua || 'N/I' }}, Bairro: {{ animal.localResgateBairro || 'N/I' }}</span>
+                      <div class="small text-muted pl-4 mt-1" v-if="animal.localResgateReferencia">
+                        <strong>Ref:</strong> {{ animal.localResgateReferencia }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6 mb-2">
+                    <small class="text-muted font-weight-bold d-block mb-1">PROTETOR / RESGATADOR RESPONSÁVEL</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-user-circle-o text-secondary mr-2"></i>{{ animal.resgatadorNome || 'Não registrado' }}
+                    </p>
+                  </div>
+                  <div class="col-12 col-md-6 mb-2">
+                    <small class="text-muted font-weight-bold d-block mb-1">CONTATO DO RESGATADOR</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-phone text-secondary mr-2"></i>{{ animal.resgatadorContato || 'Sem contato' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="activeTab === 'clinica'" class="tab-pane-fade">
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2">Status Clínico de Entrada</h5>
+                <div class="row">
+                  <div class="col-12 col-md-6 mb-3">
+                    <small class="text-muted font-weight-bold d-block mb-1">PESO DE ENTRADA</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-balance-scale text-info mr-2"></i>{{ animal.pesoEntrada ? `${animal.pesoEntrada} kg` : 'Não pesado' }}
+                    </p>
+                  </div>
+                  <div class="col-12 col-md-6 mb-3">
+                    <small class="text-muted font-weight-bold d-block mb-1">CONDIÇÃO GERAL CORPORAL</small>
+                    <p class="text-dark font-weight-600 m-0 bg-light border p-2 rounded">
+                      <i class="fa fa-heartbeat text-info mr-2"></i>{{ animal.condicaoEntrada || 'Não avaliada' }}
+                    </p>
+                  </div>
+                </div>
+
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2 mt-4">Controlo reprodutivo</h5>
+                <div class="row">
+                  <div class="col-12 mb-2">
+                    <div class="p-3 rounded border d-flex align-items-center" :class="animal.castrado ? 'bg-success-light border-success-200' : 'bg-warning-light border-warning-200'">
+                      <i class="fa fa-2x mr-3" :class="animal.castrado ? 'fa-check-circle text-success' : 'fa-times-circle text-warning'"></i>
+                      <div>
+                        <h6 class="m-0 font-weight-bold text-dark">
+                          {{ animal.castrado ? 'Animal Castrado' : 'Animal Não Castrado / Pendente' }}
+                        </h6>
+                        <small class="text-secondary" v-if="animal.castrado && animal.dataCastracao">
+                          Procedimento realizado em: {{ formatarData(animal.dataCastracao) }}
+                        </small>
+                        <small class="text-secondary" v-else-if="animal.castrado && animal.dataCastracaoDesconhecida">
+                          Castrado antes do acolhimento (Data exata desconhecida)
+                        </small>
+                        <small class="text-secondary" v-else>
+                          Necessário agendamento na clínica parceira da AMA DC.
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2 mt-4">Mapeamento Adotivo</h5>
+                <div class="row">
+                  <div class="col-12">
+                    <div class="p-3 rounded border bg-light d-flex align-items-center">
+                      <i class="fa fa-home fa-2x mr-3 text-info"></i>
+                      <div>
+                        <h6 class="m-0 font-weight-bold text-dark">Disponibilidade de Adoção</h6>
+                        <p class="m-0 small text-secondary">
+                          Status atual: <span class="badge" :class="animal.possivelAdocao ? 'badge-success' : 'badge-secondary'">{{ animal.possivelAdocao ? 'PRONTO PARA ADOÇÃO' : 'RESERVADO / EM TRATAMENTO' }}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="activeTab === 'vacinas'" class="tab-pane-fade">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                  <h5 class="text-dark font-weight-bold m-0">Esquema Vacinal</h5>
+                  <button class="btn btn-outline-info btn-xs font-weight-bold"><i class="fa fa-plus mr-1"></i> Registrar Vacina</button>
+                </div>
+                <p class="text-muted text-center p-4 bg-light rounded border small">
+                  Nenhum registo de imunização acoplado a este prontuário.
+                </p>
+              </div>
+
+              <div v-if="activeTab === 'medicamentos'" class="tab-pane-fade">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                  <h5 class="text-dark font-weight-bold m-0">Prescrições Ativas & Tratamentos</h5>
+                  <button class="btn btn-outline-info btn-xs font-weight-bold"><i class="fa fa-plus mr-1"></i> Nova Prescrição</button>
+                </div>
+                <p class="text-muted text-center p-4 bg-light rounded border small">
+                  Nenhum tratamento clínico em andamento para este pet.
+                </p>
+              </div>
+
+              <div v-if="activeTab === 'galeria'" class="tab-pane-fade">
+                <h5 class="text-dark font-weight-bold mb-2 border-bottom pb-2">Linha do Tempo de Mídias</h5>
+                <p class="text-muted small mb-3">Imagens registadas em lote. Passe o rato sobre qualquer foto para defini-la como a capa oficial do pet.</p>
+
+                <div v-if="animal.fotosGaleria && animal.fotosGaleria.length > 0" class="row row-gap-3">
+                  <div
+                    v-for="foto in animal.fotosGaleria"
+                    :key="foto.id"
+                    class="col-12 col-sm-6 col-md-4 position-relative"
+                  >
+                    <div class="card m-0 p-1 border shadow-sm rounded-lg overflow-hidden position-relative card-galeria-item">
+
+                      <span
+                        v-if="animal.urlFotoCapa === foto.url || foto.isCapa"
+                        class="badge badge-success position-absolute badge-capa-indicator shadow-sm"
+                      >
+                        <i class="fa fa-star text-warning mr-1"></i> Foto de Capa
+                      </span>
+
+                      <img :src="formatarUrlImagem(foto.url)" class="img-fluid rounded image-galeria-cover" alt="Evolução" crossorigin="anonymous">
+
+                      <div class="galeria-actions-overlay d-flex align-items-center justify-content-center">
+                        <button
+                          v-if="animal.urlFotoCapa !== foto.url && !foto.isCapa"
+                          type="button"
+                          @click="definirFotoComoCapa(foto)"
+                          class="btn btn-sm btn-info text-white font-weight-bold shadow-sm"
+                          style="background-color: #23ccef; border: none;"
+                        >
+                          <i class="fa fa-check-circle mr-1"></i> Usar como Capa
+                        </button>
+                        <span v-else class="text-white font-weight-bold small bg-dark-translucent px-3 py-1 rounded">
+                          <i class="fa fa-star text-warning mr-1"></i> Capa Ativa
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="text-center p-5 bg-light rounded border text-muted">
+                  <i class="fa fa-picture-o fa-3x mb-3 text-secondary"></i>
+                  <h6 class="font-weight-bold mb-1">Nenhuma foto neste álbum</h6>
+                  <p class="mb-0 small">Edite a ficha clínica do animal na Etapa 4 para anexar o primeiro lote de imagens.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
 
       </div>
-
     </div>
   </div>
 </template>
 
 <script>
-import Card from 'src/components/Cards/Card.vue'
 import axios from 'axios'
 
 export default {
   name: 'AnimalDetails',
-  components: { Card },
   filters: {
-    capitalizar(valor) {
+    removerUnderline(valor) {
       if (!valor) return '';
-      valor = valor.toString().toLowerCase();
-      return valor.charAt(0).toUpperCase() + valor.slice(1);
+      return valor.toString().replace(/_/g, ' ');
     }
   },
   data() {
     return {
       loading: false,
-      tabAtiva: 'clinico',
-      animal: {}
+      activeTab: 'historico', // Aba default inicial
+      animal: {
+        id: null,
+        nome: '',
+        especie: '',
+        raca: '',
+        statusId: null,
+        statusDescricao: '',
+        porte: '',
+        sexo: '',
+        idadeEstimada: '',
+        condicaoEntrada: '',
+        pesoEntrada: null,
+        microchip: '',
+        pelagemCor: '',
+        pelagemTipo: '',
+        castrado: false,
+        dataCastracao: null,
+        dataCastracaoDesconhecida: false,
+        origem: '',
+        localResgateBairro: '',
+        localResgateRua: '',
+        localResgateReferencia: '',
+        resgatadorNome: '',
+        resgatadorContato: '',
+        possivelAdocao: true,
+        historia: '',
+        urlFotoCapa: null,
+        fotosGaleria: []
+      }
     }
   },
   methods: {
     async buscarDetalhesAnimal() {
       this.loading = true;
       try {
-        const idAnimal = this.$route.params.id;
-        const response = await axios.get(`/api/animais/${idAnimal}`);
-        this.animal = response.data || {};
+        const id = this.$route.params.id;
+        const response = await axios.get(`/api/animais/${id}`);
+        if (response.data) {
+          // 🎯 Garante reatividade inicial forçando um array se vier nulo do servidor
+          this.animal = {
+            ...response.data,
+            fotosGaleria: response.data.fotosGaleria || []
+          };
+        }
       } catch (error) {
-        console.error("Erro ao buscar detalhes do animal:", error);
+        console.error("Erro ao buscar prontuário do animal:", error);
+        alert("Não foi possível carregar os detalhes deste animal.");
+        this.$router.push('/admin/animais');
       } finally {
         this.loading = false;
       }
     },
-    formatarData(dataString) {
-      if (!dataString) return '';
 
+    async definirFotoComoCapa(foto) {
       try {
-        if (typeof dataString === 'string' && dataString.includes('T')) {
-          const apenasData = dataString.split('T')[0];
-          const [ano, mes, dia] = apenasData.split('-');
-          return `${dia}/${mes}/${ano}`;
-        }
+        await axios.patch(`/api/animais/${this.animal.id}/definir-capa`, {
+          arquivoId: foto.id
+        });
 
-        if (typeof dataString === 'string' && dataString.includes('-')) {
-          const [ano, mes, dia] = dataString.split('-');
-          return `${dia}/${mes}/${ano}`;
-        }
+        this.animal.urlFotoCapa = foto.url;
 
-        const data = new Date(dataString);
-        return data.toLocaleDateString('pt-BR');
+        if (this.animal.fotosGaleria) {
+          this.animal.fotosGaleria.forEach(f => {
+            f.isCapa = (f.id === foto.id);
+          });
+        }
       } catch (error) {
-        console.error("Erro ao formatar data:", error);
-        return dataString;
+        console.error("Erro ao definir foto de capa:", error);
+
+        // 🎯 Substituição do ?. por validação tradicional compatível com ES5/Babel antigo
+        const msgErro = (error.response && error.response.data && error.response.data.message)
+          || "Erro ao salvar alteração da capa no servidor.";
+
+        alert(msgErro);
+      }
+    },
+    // 🎯 Método formatador adicionado para construir os caminhos absolutos das mídias
+    formatarUrlImagem(url) {
+      if (!url) return '';
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      const baseUrl = axios.defaults.baseURL || 'http://localhost:8080';
+      return `${baseUrl.replace(/\/$/, '')}/${url.replace(/^\//, '')}`;
+    },
+    formatarStatusTexto(status) {
+      if (!status) return '';
+      return status.toString().replace(/_/g, ' ');
+    },
+    formatarData(dataStr) {
+      if (!dataStr) return 'Não cadastrada';
+      try {
+        const partes = dataStr.split('T')[0].split('-');
+        if (partes.length === 3) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+        return dataStr;
+      } catch (e) {
+        return dataStr;
       }
     },
     statusClass(status) {
       if (!status) return 'badge-secondary';
-      
-      const s = status.toUpperCase(); 
-      
-      switch(s) {
-        case 'RESGATADO':
-          return 'badge-warning';    
+      switch (status.toUpperCase()) {
+        case 'RESGATADO': return 'badge-warning';
         case 'EM_TRATAMENTO':
-        case 'QUARENTENA':
-          return 'badge-danger';     
-        case 'DISPONIVEL_PARA_ADOCAO':
-          return 'badge-success';    
-        case 'EM_ADAPTACAO':
-          return 'badge-primary';    
-        case 'ADOTADO':
-          return 'badge-success';    
-        case 'FALECIDO':
-          return 'badge-dark';       
-        default:
-          return 'badge-secondary';  
+        case 'QUARENTENA': return 'badge-danger';
+        case 'DISPONIVEL_PARA_ADOCAO': return 'badge-success';
+        case 'EM_ADAPTACAO': return 'badge-primary';
+        case 'ADOTADO': return 'badge-success';
+        case 'FALECIDO': return 'badge-dark';
+        default: return 'badge-secondary';
       }
     }
   },
@@ -333,26 +456,90 @@ button.btn-outline-secondary:hover {
   transition: all 0.15s ease-in-out;
 }
 .nav-tabs .nav-link:hover {
-  background-color: #f8fafc;
-  border-color: #eee #eee #ddd;
+  background-color: #f8f9fa;
+  border-color: #e3e3e3;
+  border-radius: 4px 4px 0 0;
 }
 .nav-tabs .nav-link.active {
-  color: #23ccef;
-  background-color: #fff;
+  color: #23ccef !important;
   border-color: #ddd #ddd #fff;
-  border-bottom: 3px solid #23ccef;
+  background-color: #fff;
+  border-radius: 4px 4px 0 0;
 }
-.tab-pane-content {
-  padding: 15px 5px;
+
+.tab-pane-fade {
+  animation: fadeIn 0.3s ease-in-out;
 }
-.list-group-item {
-  border-color: #f1f1f1;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.italic-text {
+
+.image-cover-header {
+  height: 160px;
+  background-color: #f1f5f9;
+}
+.object-fit-cover {
+  object-fit: cover;
+}
+.overlay-gradient-pet {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 40%, rgba(255,255,255,1) 100%);
+}
+.block-label {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+.font-size-14 { font-size: 14px; }
+.font-size-13 { font-size: 13px; }
+.font-weight-500 { font-weight: 500; }
+.font-weight-600 { font-weight: 600; }
+.style-biografia-text {
   font-style: italic;
-  color: #666;
+  line-height: 1.6;
+  color: #4a5568 !important;
 }
-.shadow-inner {
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+
+.bg-success-light { background-color: #ecfdf5; }
+.border-success-200 { border-color: #a7f3d0; }
+.bg-warning-light { background-color: #fffbeb; }
+.border-warning-200 { border-color: #fde68a; }
+.gap-1 { gap: 0.25rem; }
+.row-gap-3 { row-gap: 1.25rem; }
+
+.card-galeria-item {
+  height: 170px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.image-galeria-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.badge-capa-indicator {
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  padding: 5px 9px;
+  font-size: 10px;
+  border-radius: 4px;
+}
+.galeria-actions-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+  z-index: 5;
+  border-radius: 4px;
+}
+.card-galeria-item:hover .galeria-actions-overlay {
+  opacity: 1;
+}
+.bg-dark-translucent {
+  background-color: rgba(0, 0, 0, 0.6);
 }
 </style>

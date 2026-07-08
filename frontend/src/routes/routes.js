@@ -12,7 +12,7 @@ import VoluntarioForm from 'src/pages/Voluntarios/VoluntarioForm.vue'
 // Importações do Módulo de Animais
 import AnimalList from 'src/pages/Animais/AnimalList.vue'
 import AnimalDetails from 'src/pages/Animais/AnimalDetails.vue'
-import AnimalForm from 'src/pages/Animais/AnimalForm.vue' // 🌟 CORREÇÃO: Adicionada a importação que faltava!
+import AnimalForm from 'src/pages/Animais/AnimalForm.vue'
 
 const routes = [
   {
