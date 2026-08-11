@@ -22,84 +22,111 @@
             </div>
 
             <div v-else class="table-responsive custom-table-wrapper">
-              <table class="table text-nowrap table-flexbox">
-                <thead>
-                  <tr class="header-flex-row">
-                    <th class="cell-arrow"></th>
-                    <th class="cell-name">NOME</th>
-                    <th class="cell-phone">TELEFONE</th>
-                    <th class="cell-email">E-MAIL</th>
-                    <th class="cell-status text-center">STATUS</th>
-                    <th class="cell-actions text-center">AÇÕES</th>
+            <table class="table text-nowrap table-flexbox">
+              <thead>
+                <tr class="header-flex-row">
+                  <th class="cell-arrow"></th>
+                  <th class="cell-name sortable" @click="sortBy('nome')">
+                    NOME 
+                    <i class="fa" :class="sortKey === 'nome' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
+                  </th>
+                  <th class="cell-phone d-none d-md-flex">TELEFONE</th>
+                  <th class="cell-email sortable" @click="sortBy('email')">
+                    E-MAIL
+                    <i class="fa" :class="sortKey === 'email' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
+                  </th>
+                  <th class="cell-status text-center sortable" @click="sortBy('ativo')">
+                    STATUS
+                    <i class="fa" :class="sortKey === 'ativo' ? (sortOrder === 'asc' ? 'fa-sort-amount-asc' : 'fa-sort-amount-desc') : 'fa-sort text-muted'"></i>
+                  </th>
+                  <th class="cell-actions text-center">AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="(item, index) in voluntariosOrdenados">
+                  <tr
+                    :key="'row-' + item.id"
+                    @click="toggleRow(item.id)"
+                    class="clickable-row-group"
+                    :class="{'row-group-expanded': expandedRows.includes(item.id)}"
+                  >
+                    <div class="main-row-data">
+                      <div class="cell-data cell-arrow">
+                        <i class="fa fa-chevron-right text-muted arrow-icon" :class="{'rotate-arrow': expandedRows.includes(item.id)}"></i>
+                      </div>
+                      <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
+                      <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
+                      <div class="cell-data cell-email">{{ item.email }}</div>
+                      <div class="cell-data cell-status text-center">
+                        <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
+                          {{ item.ativo ? 'Ativo' : 'Inativo' }}
+                        </span>
+                      </div>
+                      <div class="cell-data cell-actions text-center" @click.stop>
+                        <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
+                          <i class="fa fa-edit fa-lg"></i>
+                        </button>
+                        <button class="btn btn-danger btn-link btn-xs" 
+                                title="Inativar" 
+                                :disabled="!item.ativo" 
+                                @click="handleInactivate(item)">
+                          <i class="fa fa-ban fa-lg"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="expandedRows.includes(item.id)" class="full-width-dropdown animated fadeInFast" @click.stop>
+                      <div class="detail-container">
+                        <h5 class="detail-section-title">
+                          <i class="fa fa-id-card text-info mr-2"></i> Informações Detalhadas
+                        </h5>
+
+                        <div class="row m-0 mt-3">
+                          <div class="col-12 col-sm-6 col-md-3 info-box">
+                            <span class="info-label">CPF</span>
+                            <p class="info-value">{{ item.cpf || 'Não informado' }}</p>
+                          </div>
+                          <div class="col-12 col-sm-6 col-md-3 info-box">
+                            <span class="info-label">Data de Nascimento</span>
+                            <p class="info-value">{{ formatarData(item.dataNascimento) || 'Não informada' }}</p>
+                          </div>
+                          <div class="col-12 col-sm-6 col-md-3 info-box">
+                            <span class="info-label">Ocupação / Cargo</span>
+                            <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
+                          </div>
+                        </div>
+
+                        <div class="row m-0 mt-3">
+                          <div class="col-12 info-box">
+                            <span class="info-label">Observações Internas</span>
+                            <p class="obs-text">{{ item.observacoes || 'Nenhuma observação cadastrada para este voluntário.' }}</p>
+                          </div>
+                        </div>
+
+                        <!-- Perfils -->
+                         <div class="row m-0 mt-3">
+                          <div class="col-12 col-sm-6 info-box">
+                            <span class="info-label">Perfis de Acesso ao Sistema</span>
+                            <p class="info-value">
+                              <template v-if="item.perfisAcesso && item.perfisAcesso.length > 0">
+                                <span v-for="perfil in item.perfisAcesso" :key="perfil" class="badge badge-info mr-1">
+                                  {{ perfil }}
+                                </span>
+                              </template>
+                              <template v-else>
+                                <span class="text-muted font-italic">Sem acesso ao sistema configurado</span>
+                              </template>
+                            </p>
+                          </div>
+                        </div>
+                        <!-- Perfils -->
+                      </div>
+                    </div>
                   </tr>
-                </thead>
-                <tbody>
-                  <template v-for="(item, index) in tableData.data">
-                    <tr
-                      :key="'row-' + index"
-                      @click="toggleRow(item.id)"
-                      class="clickable-row-group"
-                      :class="{'row-group-expanded': expandedRows.includes(item.id)}"
-                    >
-                      <div class="main-row-data">
-                        <div class="cell-data cell-arrow">
-                          <i class="fa fa-chevron-right text-muted arrow-icon" :class="{'rotate-arrow': expandedRows.includes(item.id)}"></i>
-                        </div>
-                        <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
-                        <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
-                        <div class="cell-data cell-email">{{ item.email }}</div>
-                        <div class="cell-data cell-status text-center">
-                          <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
-                            {{ item.ativo ? 'Ativo' : 'Inativo' }}
-                          </span>
-                        </div>
-                        <div class="cell-data cell-actions text-center" @click.stop>
-                          <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
-                            <i class="fa fa-edit fa-lg"></i>
-                          </button>
-                          <button class="btn btn-danger btn-link btn-xs" 
-                                  title="Inativar" 
-                                  :disabled="!item.ativo" 
-                                  @click="handleInactivate(item)">
-                            <i class="fa fa-ban fa-lg"></i>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div v-if="expandedRows.includes(item.id)" class="full-width-dropdown animated fadeInFast" @click.stop>
-                        <div class="detail-container">
-                          <h5 class="detail-section-title">
-                            <i class="fa fa-id-card text-info mr-2"></i> Informações Detalhadas
-                          </h5>
-
-                          <div class="row m-0 mt-3">
-                            <div class="col-12 col-sm-6 col-md-3 info-box">
-                              <span class="info-label">CPF</span>
-                              <p class="info-value">{{ item.cpf || 'Não informado' }}</p>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3 info-box">
-                              <span class="info-label">Data de Nascimento</span>
-                              <p class="info-value">{{ formatarData(item.dataNascimento) || 'Não informada' }}</p>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-3 info-box">
-                              <span class="info-label">Ocupação / Cargo</span>
-                              <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
-                            </div>
-                          </div>
-
-                          <div class="row m-0 mt-3">
-                            <div class="col-12 info-box">
-                              <span class="info-label">Observações Internas</span>
-                              <p class="obs-text">{{ item.observacoes || 'Nenhuma observação cadastrada para este voluntário.' }}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
+                </template>
+              </tbody>
+            </table>
+          </div>
 
             <div v-if="!loading && tableData.data.length === 0" class="text-center p-4 text-muted">
               Nenhum registro encontrado.
@@ -149,7 +176,29 @@
           show: false,
           submitting: false,
           item: null
-        }
+        },
+        // NOVAS VARIÁVEIS DE ORDENAÇÃO
+        sortKey: 'nome',
+        sortOrder: 'asc'
+      }
+    },
+    // NOVO BLOCO COMPUTED
+    computed: {
+      voluntariosOrdenados() {
+        if (!this.tableData.data) return [];
+        
+        return [...this.tableData.data].sort((a, b) => {
+          let valorA = a[this.sortKey] || '';
+          let valorB = b[this.sortKey] || '';
+          
+          // Ignora maiúsculas/minúsculas na ordenação de texto
+          if (typeof valorA === 'string') valorA = valorA.toLowerCase();
+          if (typeof valorB === 'string') valorB = valorB.toLowerCase();
+          
+          if (valorA < valorB) return this.sortOrder === 'asc' ? -1 : 1;
+          if (valorA > valorB) return this.sortOrder === 'asc' ? 1 : -1;
+          return 0;
+        });
       }
     },
     watch: {
@@ -236,6 +285,15 @@
             type: 'danger'
           });
         }
+      },
+      // NOVO MÉTODO DE ORDENAÇÃO
+      sortBy(key) {
+        if (this.sortKey === key) {
+          this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+          this.sortKey = key;
+          this.sortOrder = 'asc';
+        }
       }
     },
     mounted() {
@@ -245,6 +303,33 @@
 </script>
 
 <style scoped>
+/* Torna os cabeçalhos clicáveis */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+th.sortable:hover {
+  color: #00bcd4 !important; /* Cor info do seu tema */
+}
+
+th.sortable i {
+  margin-left: 5px;
+  font-size: 0.85em;
+}
+
+/* Ajustes responsivos para evitar colunas espremidas em telas pequenas (< 768px) */
+@media (max-width: 767px) {
+  .cell-name  { width: 40%; } /* Pega o espaço do telefone */
+  .cell-email { width: 35%; }
+  .cell-status{ width: 15%; }
+  .cell-actions{ width: 10%; min-width: 70px;}
+  
+  /* Ajusta o texto da linha expandida para não quebrar */
+  .info-box { margin-bottom: 20px; }
+}
+
 .custom-table-wrapper {
   width: 100%;
 }
@@ -312,12 +397,12 @@
 }
 
 /* Definição exata das larguras das colunas */
-.cell-arrow    { width: 5%; min-width: 45px; }
-.cell-name     { width: 25%; }
-.cell-phone    { width: 20%; }
-.cell-email    { width: 30%; }
-.cell-status   { width: 10%; }
-.cell-actions  { width: 10%; }
+.cell-arrow    { flex: 0 0 5%;  width: 5%;  min-width: 45px; }
+.cell-name     { flex: 0 0 25%; width: 25%; }
+.cell-phone    { flex: 0 0 20%; width: 20%; }
+.cell-email    { flex: 0 0 30%; width: 30%; }
+.cell-status   { flex: 0 0 10%; width: 10%; text-align: center; }
+.cell-actions  { flex: 0 0 10%; width: 10%; text-align: center; }
 
 /* Dropdown Ocupando 100% real abaixo dos dados principais */
 .full-width-dropdown {
@@ -416,4 +501,20 @@
 .modal-text { color: #666; font-size: 15px; margin-bottom: 25px; }
 .modal-actions-buttons { display: flex; justify-content: center; gap: 15px; }
 .modal-actions-buttons .btn { padding: 10px 24px; font-weight: 600; min-width: 120px; }
+
+/* Ajustes responsivos para evitar colunas espremidas em telas pequenas (< 768px) */
+@media (max-width: 767px) {
+  .cell-phone { 
+    display: none !important; 
+  }
+  
+  /* Redistribui o espaço do telefone para as outras colunas */
+  .cell-name  { flex: 0 0 35%; width: 35%; } 
+  .cell-email { flex: 0 0 35%; width: 35%; }
+  .cell-status{ flex: 0 0 15%; width: 15%; }
+  .cell-actions{ flex: 0 0 15%; width: 15%; min-width: 70px; }
+  
+  /* Ajusta o texto da linha expandida para não quebrar */
+  .info-box { margin-bottom: 20px; }
+}
 </style>

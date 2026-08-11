@@ -46,8 +46,8 @@ public class VoluntarioEntidade extends BaseEntity {
     private Boolean ativo = true;
 
 
-    // Futuramente vincularemos ao Usuario do sistema:
-    // @OneToOne
-    // @JoinColumn(name = "usu_id")
-    // private Usuario usuario;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usu_id")
+    @org.hibernate.envers.Audited(targetAuditMode = org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED)
+    private UsuarioEntidade usuario;
 }

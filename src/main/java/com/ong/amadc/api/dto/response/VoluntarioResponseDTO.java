@@ -1,9 +1,13 @@
 package com.ong.amadc.api.dto.response;
 
+import com.ong.amadc.domain.model.PerfilEntidade;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record VoluntarioResponseDTO(
         Long id,
@@ -16,7 +20,8 @@ public record VoluntarioResponseDTO(
         LocalDateTime dataCriacao,
         Boolean ativo,
         String registradoPor,
-        String observacoes// Novo campo
+        String observacoes,
+        List<String> perfisAcesso
 ) {
     public VoluntarioResponseDTO(VoluntarioEntidade voluntario) {
         this(
@@ -30,7 +35,14 @@ public record VoluntarioResponseDTO(
                 voluntario.getDataCriacao(),
                 voluntario.getAtivo(),
                 voluntario.getRegistradoPor(),
-                voluntario.getObservacoes()
+                voluntario.getObservacoes(),
+                // Lógica de mapeamento aqui:
+                (voluntario.getUsuario() != null && voluntario.getUsuario().getPerfis() != null)
+                        ? voluntario.getUsuario().getPerfis().stream()
+                          .map(PerfilEntidade::getNome)
+                          .collect(Collectors.toList())
+                        : Collections.emptyList()
         );
+
     }
 }

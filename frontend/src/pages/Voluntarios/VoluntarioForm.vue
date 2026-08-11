@@ -57,6 +57,24 @@
                   </div>
                 </div>
               </div>
+              <!-- Seção de Perfis de Acesso (Visível principalmente na Edição) -->
+              <div class="row" v-if="isEdit">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>Perfis de Acesso ao Sistema</label>
+                    <div class="p-2 border rounded bg-light">
+                      <template v-if="form.perfisAcesso && form.perfisAcesso.length > 0">
+                        <span v-for="perfil in form.perfisAcesso" :key="perfil" class="badge badge-info mr-2 p-2">
+                          {{ perfil }}
+                        </span>
+                      </template>
+                      <template v-else>
+                        <span class="text-muted font-italic">Este voluntário não possui usuário ou perfis de acesso vinculados ao sistema.</span>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div class="row">
                 <div class="col-md-12">
