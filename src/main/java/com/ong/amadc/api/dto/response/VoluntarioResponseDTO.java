@@ -1,5 +1,6 @@
 package com.ong.amadc.api.dto.response;
 
+import com.ong.amadc.api.dto.VoluntarioUsuarioResponseDTO;
 import com.ong.amadc.domain.model.PerfilEntidade;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 
@@ -37,13 +38,16 @@ public record VoluntarioResponseDTO(
                 voluntario.getAtivo(),
                 voluntario.getRegistradoPor(),
                 voluntario.getObservacoes(),
-                // Lógica de mapeamento aqui:
+                // Lógica de mapeamento para perfisAcesso:
                 (voluntario.getUsuario() != null && voluntario.getUsuario().getPerfis() != null)
                         ? voluntario.getUsuario().getPerfis().stream()
                           .map(PerfilEntidade::getNome)
                           .collect(Collectors.toList())
-                        : Collections.emptyList()
+                        : Collections.emptyList(),
+                // Lógica de mapeamento para usuario (usando o construtor do DTO):
+                (voluntario.getUsuario() != null)
+                        ? new VoluntarioUsuarioResponseDTO(voluntario.getUsuario())
+                        : null
         );
-
     }
 }
