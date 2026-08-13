@@ -1,9 +1,10 @@
 package com.ong.amadc.domain.business;
 
-import com.ong.amadc.api.dto.VoluntarioRequestDTO;
+import com.ong.amadc.api.dto.request.VoluntarioRequestDTO;
 import com.ong.amadc.domain.model.PerfilEntidade;
 import com.ong.amadc.domain.model.UsuarioEntidade;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
+import com.ong.amadc.domain.repository.PerfilRepository; // Importar
 import com.ong.amadc.domain.repository.UsuarioRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors; // Importar
 
 @Component
 @AllArgsConstructor
@@ -19,6 +21,7 @@ public class VoluntarioBusiness {
 
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
+    private final PerfilRepository perfilRepository; // Injetar
 
     /**
      * Exemplo: Regra que determina se um voluntário precisa de
@@ -84,13 +87,13 @@ public class VoluntarioBusiness {
      * Regra auxiliar para converter a lista de IDs vinda do Front-end em entidades gerenciadas.
      */
     private Set<PerfilEntidade> traduzirIdsParaPerfis(Set<Long> perfilIds) {
-        Set<PerfilEntidade> perfis = new HashSet<>();
-        if (perfilIds != null) {
-            perfilIds.forEach(id -> {
-                PerfilEntidade perfil = new PerfilEntidade();
-                perfil.setId(id); // O JPA resolverá a relação pelo ID na transação
-                perfis.add(perfil);
-            });
+        if (perfilIds == null || perfilIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        Set<PerfilEntidade> perfis = new HashSet<>(perfilRepository.findAllById(perfilIds));
+        if (perfis.size() != perfilIds.size()) {
+            // Lança uma exceção se algum ID de perfil não foi encontrado
+            throw new IllegalArgumentException("Um ou mais IDs de perfil são inválidos.");
         }
         return perfis;
     }
