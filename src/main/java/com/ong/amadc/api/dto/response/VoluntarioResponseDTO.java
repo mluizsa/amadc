@@ -21,7 +21,8 @@ public record VoluntarioResponseDTO(
         Boolean ativo,
         String registradoPor,
         String observacoes,
-        List<String> perfisAcesso
+        List<String> perfisAcesso,
+        VoluntarioUsuarioResponseDTO usuario
 ) {
     public VoluntarioResponseDTO(VoluntarioEntidade voluntario) {
         this(

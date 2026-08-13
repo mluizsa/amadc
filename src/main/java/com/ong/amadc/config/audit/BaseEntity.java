@@ -30,9 +30,10 @@ public abstract class BaseEntity {
     private LocalDateTime dataAlteracao;
 
     @CreatedBy
-    @Column(updatable = false)
+    @Column(name = "registrado_por", updatable = false)
     private String registradoPor;
 
     @LastModifiedBy
+    @Column(name = "alterado_por")
     private String alteradoPor;
 }

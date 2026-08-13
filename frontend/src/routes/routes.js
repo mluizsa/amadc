@@ -34,7 +34,22 @@ const routes = [
         path: 'overview',
         name: 'Painel',
         component: Overview,
-        meta: { 
+        meta: {
+          icon: 'nc-icon nc-chart-pie-35',
+          hidden: false
+        }
+      },
+      // --- CATEGORIA: GESTÃO OPERACIONAL ---
+      {
+        path: 'animais',
+        name: 'Animais',
+        component: TableList, // Depois mudaremos para o componente específico de Animais
+        meta: {
+          icon: 'fa fa-paw',
+          permission: 'ANIMAL_READ',
+          category: 'Gestão Operacional',
+          hidden: false
+        meta: {
           icon: 'nc-icon nc-chart-pie-35',
           isHeader: true,        // 🌟 Adicionado para criar a seção inicial
           headerTitle: 'Início'
@@ -59,9 +74,9 @@ const routes = [
         path: 'animais/novo',
         name: 'Novo Animal',
         component: AnimalForm,
-        meta: { 
-          permission: 'VOLUNTARIO_ANIMAIS', 
-          hidden: true 
+        meta: {
+          permission: 'VOLUNTARIO_ANIMAIS',
+          hidden: true
         }
       },
       {
@@ -69,15 +84,15 @@ const routes = [
         name: 'Editar Animal',
         component: AnimalForm,
         meta: {
-          permission: 'VOLUNTARIO_ANIMAIS', 
-          hidden: true 
+          permission: 'VOLUNTARIO_ANIMAIS',
+          hidden: true
         }
       },
       {
         path: 'animais/detalhes/:id',
         name: 'Detalhes do Animal',
         component: AnimalDetails,
-        meta: { 
+        meta: {
           permission: 'VOLUNTARIO_ANIMAIS',
           hidden: true
         }
@@ -112,6 +127,19 @@ const routes = [
           headerTitle: 'RH | Gestão'
         }
       },
+      // --- CATEGORIA: CONFIGURAÇÕES E RH ---
+      {
+        path: 'voluntarios',
+        name: 'Voluntários',
+        component: TableList,
+        meta: {
+          icon: 'nc-icon nc-badge',
+          permission: 'VOLUNTARIO_READ',
+          category: 'Configurações e RH',
+          hidden: false
+        }
+      },
+      // --- ROTAS INTERNAS (ESCONDIDAS DO MENU) ---
       {
         path: 'voluntarios/novo',
         name: 'Novo Voluntário',
@@ -131,7 +159,7 @@ const routes = [
         path: 'user',
         name: 'Meu Perfil',
         component: UserProfile,
-        meta: { 
+        meta: {
           icon: 'fa fa-user',
           hidden: false,
           isHeader: true,        // Divisor do menu

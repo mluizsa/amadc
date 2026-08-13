@@ -15,7 +15,10 @@ const SidebarStore = {
     this.sidebarLinks = adminRoot.children
       .filter(route => {
         if (route.meta && route.meta.hidden) return false;
+
         if (!route.meta || !route.meta.permission) return true;
+
+        // Verifica a permissão específica ou se o usuário tem a role global ADMIN
         return list.includes(route.meta.permission) || list.includes('ADMIN');
       })
       .map(route => ({

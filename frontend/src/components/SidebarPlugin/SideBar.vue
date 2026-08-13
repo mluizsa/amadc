@@ -14,7 +14,17 @@
       </div>
 
       <slot name="content"></slot>
+
       <ul class="nav nav-main__links">
+        <template v-for="(link, index) in sidebarLinks">
+
+          <li v-if="link.meta && link.meta.category && shouldShowCategoryTitle(link, index)"
+              :key="'cat-' + index"
+              class="sidebar-category-title">
+            <span>{{ link.meta.category }}</span>
+          </li>
+
+          <sidebar-link :key="link.name + index"
         <slot>
           <sidebar-link v-for="(link, index) in sidebarLinks"
                         :key="'sidebar-item-' + index"
@@ -24,8 +34,10 @@
             <i :class="link.icon"></i>
             <p>{{ link.name }}</p>
           </sidebar-link>
-        </slot>
+
+        </template>
       </ul>
+
       <ul class="nav nav-bottom" v-if="$slots['bottom-links']">
         <slot name="bottom-links"></slot>
       </ul>
@@ -84,6 +96,32 @@
         return {
           backgroundImage: `url(${this.backgroundImage})`
         }
+      },
+      // Filtra links marcados com hidden no meta para não poluírem a lista
+      visibleLinks() {
+        return this.sidebarLinks.filter(link => {
+          if (link.meta && link.meta.hidden === true) {
+            return false;
+          }
+          return true;
+        });
+      }
+    },
+    methods: {
+      // Método lógico que descobre se precisa renderizar o cabeçalho de categoria
+      shouldShowCategoryTitle(currentLink, index) {
+        if (index === 0) return true;
+
+        const previousLink = this.visibleLinks[index - 1];
+        const currentCategory = currentLink.meta ? currentLink.meta.category : null;
+        const previousCategory = previousLink.meta ? previousLink.meta.category : null;
+
+        return currentCategory !== previousCategory;
+      },
+      closeNavbar() {
+        if (this.$sidebar && this.$sidebar.showSidebar) {
+          this.$sidebar.displaySidebar(false);
+        }
       }
     },
     methods: {
@@ -96,10 +134,10 @@
       deveExibirGrupo(link, index) {
         // Se o link não tiver grupo definido, não exibe nada
         if (!link.group) return false;
-        
+
         // Se for o primeiro item da lista inteira e tem grupo, exibe
         if (index === 0) return true;
-        
+
         // Só exibe se o grupo do item atual for DIFERENTE do grupo do item anterior
         return link.group !== this.sidebarLinks[index - 1].group;
       }
@@ -108,6 +146,8 @@
 </script>
 
 <style>
+
+<style scoped>
   .sidebar .sidebar-wrapper {
     display: flex;
     flex-direction: column;
@@ -135,4 +175,24 @@
    display: block;
    width: 100%;
  }
+  .sidebar .nav-main__links {
+    flex: 1;
+    padding-top: 10px;
+  }
+  .sidebar .sidebar-wrapper .logo .logo__container {
+    padding-left: 10px;
+  }
+
+  /* Estilização limpa e moderna para os Subtítulos das Categorias */
+  .sidebar-category-title {
+    padding: 15px 20px 5px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.45);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    display: block;
+    width: 100%;
+    pointer-events: none; /* Evita cliques acidentais */
+  }
 </style>

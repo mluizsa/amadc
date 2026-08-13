@@ -27,7 +27,7 @@
                 <tr class="header-flex-row">
                   <th class="cell-arrow"></th>
                   <th class="cell-name sortable" @click="sortBy('nome')">
-                    NOME 
+                    NOME
                     <i class="fa" :class="sortKey === 'nome' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
                   </th>
                   <th class="cell-phone d-none d-md-flex">TELEFONE</th>
@@ -66,9 +66,9 @@
                         <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
                           <i class="fa fa-edit fa-lg"></i>
                         </button>
-                        <button class="btn btn-danger btn-link btn-xs" 
-                                title="Inativar" 
-                                :disabled="!item.ativo" 
+                        <button class="btn btn-danger btn-link btn-xs"
+                                title="Inativar"
+                                :disabled="!item.ativo"
                                 @click="handleInactivate(item)">
                           <i class="fa fa-ban fa-lg"></i>
                         </button>
@@ -95,6 +95,24 @@
                             <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
                           </div>
                         </div>
+                          <div class="row m-0 mt-3">
+                            <div class="col-12 col-sm-6 col-md-3 info-box">
+                              <span class="info-label">CPF</span>
+                              <p class="info-value">{{ item.cpf || 'Não informado' }}</p>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3 info-box">
+                              <span class="info-label">Data de Nascimento</span>
+                              <p class="info-value">{{ formatarData(item.dataNascimento) || 'Não informada' }}</p>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3 info-box">
+                              <span class="info-label">Ocupação / Cargo</span>
+                              <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
+                            </div>
+                            <div v-if="item.usuario" class="col-12 col-sm-6 col-md-3 info-box">
+                              <span class="info-label">Usuário do Sistema</span>
+                              <p class="info-value text-info">@{{ item.usuario.username }}</p>
+                            </div>
+                          </div>
 
                         <div class="row m-0 mt-3">
                           <div class="col-12 info-box">
@@ -122,6 +140,12 @@
                         <!-- Perfils -->
                       </div>
                     </div>
+                  </template>
+                </div>
+
+              </div>
+            </div>
+                    </div>
                   </tr>
                 </template>
               </tbody>
@@ -144,7 +168,7 @@
         <h3 class="modal-title">Desativar Voluntário</h3>
         <p class="modal-text">
           Você está prestes a desativar <strong>{{ modalInativar.item ? modalInativar.item.nome : '' }}</strong>.<br>
-          Este registro não constará mais na lista de voluntários ativos.
+          Este registro não constará mais na lista de voluntários activos.
         </p>
         <div class="modal-actions-buttons">
           <button class="btn btn-neutral btn-fill" @click="fecharModalInativar">Cancelar</button>
@@ -186,15 +210,15 @@
     computed: {
       voluntariosOrdenados() {
         if (!this.tableData.data) return [];
-        
+
         return [...this.tableData.data].sort((a, b) => {
           let valorA = a[this.sortKey] || '';
           let valorB = b[this.sortKey] || '';
-          
+
           // Ignora maiúsculas/minúsculas na ordenação de texto
           if (typeof valorA === 'string') valorA = valorA.toLowerCase();
           if (typeof valorB === 'string') valorB = valorB.toLowerCase();
-          
+
           if (valorA < valorB) return this.sortOrder === 'asc' ? -1 : 1;
           if (valorA > valorB) return this.sortOrder === 'asc' ? 1 : -1;
           return 0;
@@ -229,15 +253,11 @@
 
       formatarData(dataIso) {
         if (!dataIso) return 'Não informada';
-
-        // Trata strings de data puras como '1995-10-25' quebrando os hífenes
-        // Isso evita bugs de fuso horário que o "new Date()" nativo costuma causar
         const partes = dataIso.split('-');
         if (partes.length === 3) {
           const [ano, mes, dia] = partes;
           return `${dia}/${mes}/${ano}`;
         }
-
         return dataIso;
       },
 
@@ -325,7 +345,7 @@ th.sortable i {
   .cell-email { width: 35%; }
   .cell-status{ width: 15%; }
   .cell-actions{ width: 10%; min-width: 70px;}
-  
+
   /* Ajusta o texto da linha expandida para não quebrar */
   .info-box { margin-bottom: 20px; }
 }
@@ -334,7 +354,6 @@ th.sortable i {
   width: 100%;
 }
 
-/* Força a tabela inteira a seguir flexbox para harmonizar com o tema */
 .table-flexbox {
   display: flex !important;
   flex-direction: column !important;
@@ -349,7 +368,6 @@ th.sortable i {
   width: 100% !important;
 }
 
-/* Alinhamento perfeito do cabeçalho */
 .header-flex-row {
   display: flex !important;
   width: 100% !important;
@@ -364,11 +382,10 @@ th.sortable i {
   color: #666;
 }
 
-/* Estrutura das Linhas de Registro */
 .clickable-row-group {
   cursor: pointer;
   display: flex !important;
-  flex-wrap: wrap !important; /* Permite que o painel expandido caia para baixo */
+  flex-wrap: wrap !important;
   width: 100% !important;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid #eeeeee !important;
@@ -382,7 +399,6 @@ th.sortable i {
   background-color: #fcfdfe !important;
 }
 
-/* Alinhamento estrito horizontal dos dados superiores */
 .main-row-data {
   display: flex !important;
   width: 100% !important;
@@ -404,7 +420,25 @@ th.sortable i {
 .cell-status   { flex: 0 0 10%; width: 10%; text-align: center; }
 .cell-actions  { flex: 0 0 10%; width: 10%; text-align: center; }
 
-/* Dropdown Ocupando 100% real abaixo dos dados principais */
+/* Estilização dos Badges de Acesso Customizados */
+.badge-acesso {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-acesso.liberated, .badge-acesso.liberado {
+  background-color: #e6f9f3;
+  color: #10b981;
+}
+.badge-acesso.bloqueado {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
 .full-width-dropdown {
   flex: 0 0 100% !important;
   width: 100% !important;
@@ -413,7 +447,7 @@ th.sortable i {
 }
 
 .detail-container {
-  padding: 25px 30px 25px 50px; /* Recuo extra para alinhar após a seta */
+  padding: 25px 30px 25px 50px;
   border-left: 4px solid #00bcd4;
   background-color: #f8fafc;
   width: 100%;
@@ -430,7 +464,6 @@ th.sortable i {
   letter-spacing: 0.8px;
 }
 
-/* Configuração dos blocos internos de informação */
 .info-box {
   margin-bottom: 15px;
   text-align: left !important;
@@ -464,7 +497,6 @@ th.sortable i {
   line-height: 1.5;
 }
 
-/* Animações e Ícones */
 .arrow-icon {
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -480,12 +512,6 @@ th.sortable i {
   border-radius: 4px;
 }
 
-.action-cells .btn-link {
-  padding: 5px 10px;
-  margin: 0 2px;
-  border: none;
-}
-
 .animated { animation-duration: 0.25s; animation-fill-mode: both; }
 .fadeInFast { animation-name: fadeIn; animation-duration: 0.18s; }
 @keyframes fadeIn {
@@ -493,7 +519,6 @@ th.sortable i {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Modal CSS */
 .custom-modal-backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.4); z-index: 1050; backdrop-filter: blur(4px); }
 .custom-modal-card { background: #FFFFFF; padding: 30px; border-radius: 12px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
 .modal-icon-wrapper { font-size: 52px; margin-bottom: 15px; }
@@ -504,16 +529,16 @@ th.sortable i {
 
 /* Ajustes responsivos para evitar colunas espremidas em telas pequenas (< 768px) */
 @media (max-width: 767px) {
-  .cell-phone { 
-    display: none !important; 
+  .cell-phone {
+    display: none !important;
   }
-  
+
   /* Redistribui o espaço do telefone para as outras colunas */
-  .cell-name  { flex: 0 0 35%; width: 35%; } 
+  .cell-name  { flex: 0 0 35%; width: 35%; }
   .cell-email { flex: 0 0 35%; width: 35%; }
   .cell-status{ flex: 0 0 15%; width: 15%; }
   .cell-actions{ flex: 0 0 15%; width: 15%; min-width: 70px; }
-  
+
   /* Ajusta o texto da linha expandida para não quebrar */
   .info-box { margin-bottom: 20px; }
 }

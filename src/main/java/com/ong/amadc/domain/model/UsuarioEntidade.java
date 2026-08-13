@@ -44,6 +44,13 @@ public class UsuarioEntidade extends BaseEntity implements UserDetails {
     )
     private Set<PerfilEntidade> perfis;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "volu_id",
+            referencedColumnName = "volu_id",
+            unique = true)
+    private VoluntarioEntidade voluntario;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return perfis.stream()

@@ -28,7 +28,7 @@ public class VoluntarioController {
     @Operation(summary = "Cadastrar voluntários",
             description = "Cadastro de voluntários na ONG")
     public ResponseEntity<VoluntarioEntidade> cadastrar(@RequestBody @Valid VoluntarioRequestDTO dto) {
-        var salvo = service.cadastrar(dto.toEntity());
+        var salvo = service.cadastrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
