@@ -24,8 +24,9 @@ const SidebarStore = {
       })
       .map(route => ({
         name: route.name,
-        icon: route.meta.icon || 'ti-view-list',
-        path: `/admin/${route.path}`
+        path: `/admin/${route.path}`,
+        icon: route.meta && route.meta.icon ? route.meta.icon : '',
+        meta: route.meta // Garante o transporte do 'category' e 'hidden' para o componente Sidebar
       }));
   },
   displaySidebar (value) {

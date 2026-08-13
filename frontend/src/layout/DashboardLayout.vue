@@ -1,15 +1,7 @@
 <template>
   <div class="wrapper">
-    <side-bar>
+    <side-bar :sidebar-links="$sidebar.sidebarLinks">
       <mobile-menu slot="content"></mobile-menu>
-
-      <sidebar-link v-for="(link, index) in $sidebar.sidebarLinks"
-                    :key="link.name + index"
-                    :to="link.path"
-                    :link="link">
-        <i :class="link.icon"></i>
-        <p>{{ link.name }}</p>
-      </sidebar-link>
     </side-bar>
 
     <div class="main-panel">

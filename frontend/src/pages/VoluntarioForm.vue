@@ -5,7 +5,7 @@
         <div class="col-12 col-md-8 offset-md-2">
           <card>
             <template slot="header">
-              <h4 class="card-title">Cadastrar Novo Voluntário</h4>
+              <h4 class="card-title">{{ isEdit ? 'Editar Voluntário' : 'Cadastrar Novo Voluntário' }}</h4>
               <p class="card-category">Insira os dados para a associação AMA DC</p>
             </template>
 
@@ -67,6 +67,63 @@
                 </div>
               </div>
 
+              <hr class="audit-divider">
+              
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <div class="access-toggle-container">
+                    <label class="switch-label">
+                      <input type="checkbox" v-model="form.permitirAcesso" class="custom-switch">
+                      <span class="switch-slider"></span>
+                    </label>
+                    <span class="access-text">
+                      <strong>Permitir que este voluntário acesse o sistema interno</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="form.permitirAcesso" class="access-box animated fadeIn">
+                <h5 class="access-title"><i class="fa fa-lock"></i> Credenciais de Segurança</h5>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Nome de Usuário (Login) <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" v-model="form.username" :required="form.permitirAcesso" placeholder="Ex: joao.amadc">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>
+                        Senha Provisória 
+                        <span v-if="!isEdit" class="text-danger">*</span>
+                        <span v-else class="text-muted small">(Deixe em branco para não alterar)</span>
+                      </label>
+                      <input type="password" class="form-control" v-model="form.senhaProvisoria" :required="form.permitirAcesso && !isEdit" placeholder="Mínimo 6 caracteres">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-12">
+                    <label class="d-block font-weight-bold">Perfis de Acesso vinculados:</label>
+                    <div class="perfis-grid">
+                      <div v-for="perfil in listaPerfis" :key="perfil.id" class="perfil-checkbox-item">
+                        <label class="checkbox-container">
+                          <input type="checkbox" :value="perfil.id" v-model="form.perfilIds">
+                          <span class="checkmark"></span>
+                          <span class="perfil-name">{{ formatPerfilNome(perfil.nome) }}</span>
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="listaPerfis.length === 0" class="text-muted small">
+                      <i class="fa fa-spinner fa-spin"></i> Carregando perfis disponíveis...
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="d-flex justify-content-between align-items-center mt-4">
                 <button type="button" class="btn btn-secondary btn-fill" @click="goBack">
                   Cancelar
@@ -93,7 +150,8 @@ export default {
   data() {
     return {
       saving: false,
-      isEdit: false, // Flag para sabermos o modo atual da tela
+      isEdit: false,
+      listaPerfis: [], 
       form: {
         id: null,
         nome: '',
@@ -103,62 +161,97 @@ export default {
         email: '',
         ocupacao: '',
         observacoes: '',
-        ativo: true
+        ativo: true,
+        permitirAcesso: false,
+        username: '',
+        senhaProvisoria: '',
+        perfilIds: []
       }
     }
   },
   methods: {
-    // 1. Busca os dados do voluntário caso seja Edição
+    async carregarPerfis() {
+      try {
+        const response = await axios.get('/api/perfis');
+        this.listaPerfis = response.data;
+      } catch (error) {
+        console.error("Erro ao obter perfis de segurança:", error);
+      }
+    },
+
     async carregarVoluntario(id) {
-          try {
-            const response = await axios.get(`/api/voluntarios/${id}`);
-            this.form = response.data;
-            console.log("Dados do voluntário carregados:", this.form);
-          } catch (error) {
-            console.error("Erro ao carregar dados do voluntário:", error);
+      try {
+        const response = await axios.get(`/api/voluntarios/${id}`);
+        const dados = response.data;
+        
+        this.form.id = dados.id;
+        this.form.nome = dados.nome;
+        this.form.cpf = dados.cpf;
+        this.form.dataNascimento = dados.dataNascimento;
+        this.form.telefone = dados.telefone;
+        this.form.email = dados.email;
+        this.form.ocupacao = dados.ocupacao;
+        this.form.observacoes = dados.observacoes;
+        this.form.ativo = dados.ativo;
 
-            let errorMsg = 'Não foi possível recuperar os dados do voluntário.';
+        if (dados.usuario && dados.usuario.ativo) {
+          this.form.permitirAcesso = true;
+          this.form.username = dados.usuario.username;
+          this.form.senhaProvisoria = ''; 
+          this.form.perfilIds = dados.usuario.perfis ? dados.usuario.perfis.map(p => p.id) : [];
+        } else {
+          this.form.permitirAcesso = false;
+          this.form.username = dados.usuario ? dados.usuario.username : '';
+          this.form.senhaProvisoria = '';
+          this.form.perfilIds = [];
+        }
 
-            // Se o backend respondeu com o 404 do seu TratadorDeErros
-            if (error.response && error.response.status === 404) {
-              errorMsg = 'O voluntário solicitado não foi encontrado no sistema (ID inexistente).';
-            } else if (error.response && error.response.data && error.response.data.message) {
-              errorMsg = error.response.data.message;
-            }
+        console.log("Dados do voluntário carregados:", this.form);
+      } catch (error) {
+        console.error("Erro ao carregar dados do voluntário:", error);
+        let errorMsg = 'Não foi possível recuperar os dados do voluntário.';
 
-            this.$notifications.notify({
-              message: `<span><b>Aviso:</b> ${errorMsg}</span>`,
-              icon: 'fa fa-exclamation-triangle',
-              horizontalAlign: 'right',
-              verticalAlign: 'top',
-              type: 'danger'
-            });
+        if (error.response && error.response.status === 404) {
+          errorMsg = 'O voluntário solicitado não foi encontrado no sistema (ID inexistente).';
+        } else if (error.response && error.response.data && error.response.data.message) {
+          errorMsg = error.response.data.message;
+        }
 
-            this.goBack(); // Retorna para a listagem com segurança
-          }
-        },
+        this.$notifications.notify({
+          message: `<span><b>Aviso:</b> ${errorMsg}</span>`,
+          icon: 'fa fa-exclamation-triangle',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'danger'
+        });
 
-    // 2. Decide se faz um POST (Novo) ou PUT (Atualizar)
+        this.goBack();
+      }
+    },
+
     async handleSubmit() {
       this.saving = true;
       try {
-        // Sanitiza o CPF para salvar apenas os números exigidos pelo DTO
         const payload = {
           ...this.form,
           cpf: this.form.cpf.replace(/\D/g, '')
         };
 
+        if (!payload.permitirAcesso) {
+          payload.permitirAcesso = false;
+          payload.username = null;
+          payload.senhaProvisoria = null;
+          payload.perfilIds = [];
+        }
+
         if (this.isEdit) {
-          // Cenário de Edição: Chama o @PutMapping("/{id}") da sua controller
           await axios.put(`/api/voluntarios/${this.form.id}`, payload);
           var acaoTexto = 'atualizado';
         } else {
-          // Cenário de Cadastro: Chama o @PostMapping
           await axios.post('/api/voluntarios', payload);
           var acaoTexto = 'cadastrado';
         }
 
-        // Notificação Fluida de Sucesso
         this.$notifications.notify({
           message: `<span><b>Sucesso!</b> Voluntário ${this.form.nome} foi ${acaoTexto} com sucesso.</span>`,
           icon: 'fa fa-check-circle',
@@ -197,12 +290,21 @@ export default {
         this.saving = false;
       }
     },
+
     goBack() {
       this.$router.push('/admin/voluntarios');
+    },
+
+    formatPerfilNome(nome) {
+      if (!nome) return '';
+      return nome.replace(/_/g, ' ')
+                 .toLowerCase()
+                 .replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
     }
   },
   mounted() {
-    // Verifica se a rota atual possui o parâmetro id
+    this.carregarPerfis();
+
     const idVoluntario = this.$route.params.id;
     if (idVoluntario) {
       this.isEdit = true;
@@ -227,5 +329,157 @@ export default {
 }
 textarea.form-control {
   height: auto !important;
+}
+
+.audit-divider {
+  margin: 30px 0 20px 0;
+  border-top: 1px dashed #e3e3e3;
+}
+.access-toggle-container {
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+.access-text {
+  margin-left: 12px;
+  color: #444;
+  font-size: 14px;
+}
+.access-box {
+  background-color: #f4f7f6;
+  border-left: 4px solid #1dc7ea;
+  padding: 20px;
+  border-radius: 0 6px 6px 0;
+  margin-top: 15px;
+}
+.access-title {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 15px;
+  color: #333;
+  font-weight: 600;
+}
+.access-title i {
+  color: #1dc7ea;
+  margin-right: 5px;
+}
+
+.perfis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.perfil-checkbox-item {
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e3e3e3;
+}
+
+.switch-label {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+.custom-switch {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 22px;
+}
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+.custom-switch:checked + .switch-slider {
+  background-color: #1dc7ea;
+}
+.custom-switch:checked + .switch-slider:before {
+  transform: translateX(22px);
+}
+
+.checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 28px;
+  margin-bottom: 0;
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+}
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0; width: 0;
+}
+.checkmark {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border-radius: 3px;
+}
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #1dc7ea;
+}
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 3px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.perfil-name {
+  color: #565656;
+  font-weight: 500;
+}
+
+.animated {
+  animation-duration: 0.4s;
+  animation-fill-mode: both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fadeIn {
+  animation-name: fadeIn;
 }
 </style>

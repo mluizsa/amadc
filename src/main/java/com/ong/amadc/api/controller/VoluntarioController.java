@@ -26,7 +26,7 @@ public class VoluntarioController {
     @PostMapping
     @PreAuthorize("hasAnyAuthority('VOLUNTARIO_WRITE', 'ADMIN')")
     public ResponseEntity<VoluntarioEntidade> cadastrar(@RequestBody @Valid VoluntarioRequestDTO dto) {
-        var salvo = service.cadastrar(dto.toEntity());
+        var salvo = service.cadastrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 

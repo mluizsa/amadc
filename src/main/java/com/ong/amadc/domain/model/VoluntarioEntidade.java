@@ -45,6 +45,9 @@ public class VoluntarioEntidade extends BaseEntity {
     @Column(name = "volu_ativo")
     private Boolean ativo = true;
 
+    @OneToOne(mappedBy = "voluntario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "usu_id")
+    private UsuarioEntidade usuario;
 
     // Futuramente vincularemos ao Usuario do sistema:
     // @OneToOne
