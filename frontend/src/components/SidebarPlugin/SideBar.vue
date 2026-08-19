@@ -16,18 +16,17 @@
       <slot name="content"></slot>
 
       <ul class="nav nav-main__links">
-        <template v-for="(link, index) in sidebarLinks">
-
+        <template v-for="(link, index) in visibleLinks">
+          
+          <!-- Título da Categoria -->
           <li v-if="link.meta && link.meta.category && shouldShowCategoryTitle(link, index)"
               :key="'cat-' + index"
               class="sidebar-category-title">
             <span>{{ link.meta.category }}</span>
           </li>
 
+          <!-- Link do Menu -->
           <sidebar-link :key="link.name + index"
-        <slot>
-          <sidebar-link v-for="(link, index) in sidebarLinks"
-                        :key="'sidebar-item-' + index"
                         :to="link.path"
                         @click="closeNavbar"
                         :link="link">
@@ -118,63 +117,20 @@
 
         return currentCategory !== previousCategory;
       },
-      closeNavbar() {
-        if (this.$sidebar && this.$sidebar.showSidebar) {
-          this.$sidebar.displaySidebar(false);
-        }
-      }
-    },
-    methods: {
       closeNavbar () {
         if (this.autoClose && this.$sidebar && this.$sidebar.showSidebar) {
           this.$sidebar.displaySidebar(false)
         }
-      },
-      // Lógica para não duplicar o título do grupo no menu
-      deveExibirGrupo(link, index) {
-        // Se o link não tiver grupo definido, não exibe nada
-        if (!link.group) return false;
-
-        // Se for o primeiro item da lista inteira e tem grupo, exibe
-        if (index === 0) return true;
-
-        // Só exibe se o grupo do item atual for DIFERENTE do grupo do item anterior
-        return link.group !== this.sidebarLinks[index - 1].group;
       }
     }
   }
 </script>
-
-<style>
 
 <style scoped>
   .sidebar .sidebar-wrapper {
     display: flex;
     flex-direction: column;
   }
- .sidebar .nav-main__links {
-   flex: 1;
- }
- .sidebar .sidebar-wrapper .logo .logo__container {
-   padding-left: 10px;
- }
-
- /* Margem adicional caso não seja o primeiro item do menu */
- .sidebar-group-title:not(:first-child) {
-   margin-top: 15px;
- }
-
- .sidebar-group-title {
-   padding: 22px 0px 6px 25px;
-   font-size: 11px;
-   font-weight: 800;
-   text-transform: uppercase;
-   letter-spacing: 1.5px;
-   color: #ffffff !important; /* 🌟 Branco total para destacar no fundo escuro */
-   list-style-type: none;
-   display: block;
-   width: 100%;
- }
   .sidebar .nav-main__links {
     flex: 1;
     padding-top: 10px;

@@ -36,22 +36,8 @@ const routes = [
         component: Overview,
         meta: {
           icon: 'nc-icon nc-chart-pie-35',
-          hidden: false
-        }
-      },
-      // --- CATEGORIA: GESTÃO OPERACIONAL ---
-      {
-        path: 'animais',
-        name: 'Animais',
-        component: TableList, // Depois mudaremos para o componente específico de Animais
-        meta: {
-          icon: 'fa fa-paw',
-          permission: 'ANIMAL_READ',
-          category: 'Gestão Operacional',
-          hidden: false
-        meta: {
-          icon: 'nc-icon nc-chart-pie-35',
-          isHeader: true,        // 🌟 Adicionado para criar a seção inicial
+          hidden: false,
+          isHeader: true,
           headerTitle: 'Início'
         }
       },
@@ -64,9 +50,9 @@ const routes = [
         component: AnimalList,
         meta: {
           icon: 'fa fa-paw',
-          permission: 'VOLUNTARIO_ANIMAIS', // 🌟 Atualizado para sua nova permissão
+          permission: 'VOLUNTARIO_ANIMAIS',
           hidden: false,
-          isHeader: true,        // Divisor do menu
+          isHeader: true,
           headerTitle: 'Animais'
         }
       },
@@ -98,17 +84,17 @@ const routes = [
         }
       },
       /* =========================================================================
-         MÓDULO FINANCEIRO (Exemplo de expansão futura)
+         MÓDULO FINANCEIRO
          ========================================================================= */
       {
         path: 'financeiro',
         name: 'Caixa / Custos',
-        component: Overview, // Temporário, aponte para seu futuro componente financeiro
+        component: Overview,
         meta: {
           icon: 'nc-icon nc-money-coins',
-          permission: 'VOLUNTARIO_FINANCEIRO', // 🌟 Sua nova permissão financeira
+          permission: 'VOLUNTARIO_FINANCEIRO',
           hidden: false,
-          isHeader: true,        // Divisor do menu
+          isHeader: true,
           headerTitle: 'Gestão Financeira'
         }
       },
@@ -123,20 +109,8 @@ const routes = [
           icon: 'nc-icon nc-badge',
           permission: 'VOLUNTARIO_READ',
           hidden: false,
-          isHeader: true,        // Divisor do menu
+          isHeader: true,
           headerTitle: 'RH | Gestão'
-        }
-      },
-      // --- CATEGORIA: CONFIGURAÇÕES E RH ---
-      {
-        path: 'voluntarios',
-        name: 'Voluntários',
-        component: TableList,
-        meta: {
-          icon: 'nc-icon nc-badge',
-          permission: 'VOLUNTARIO_READ',
-          category: 'Configurações e RH',
-          hidden: false
         }
       },
       // --- ROTAS INTERNAS (ESCONDIDAS DO MENU) ---
@@ -162,7 +136,7 @@ const routes = [
         meta: {
           icon: 'fa fa-user',
           hidden: false,
-          isHeader: true,        // Divisor do menu
+          isHeader: true,
           headerTitle: 'Configurações'
         }
       }

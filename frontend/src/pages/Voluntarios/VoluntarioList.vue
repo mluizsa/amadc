@@ -22,79 +22,66 @@
             </div>
 
             <div v-else class="table-responsive custom-table-wrapper">
-            <table class="table text-nowrap table-flexbox">
-              <thead>
-                <tr class="header-flex-row">
-                  <th class="cell-arrow"></th>
-                  <th class="cell-name sortable" @click="sortBy('nome')">
-                    NOME
-                    <i class="fa" :class="sortKey === 'nome' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
-                  </th>
-                  <th class="cell-phone d-none d-md-flex">TELEFONE</th>
-                  <th class="cell-email sortable" @click="sortBy('email')">
-                    E-MAIL
-                    <i class="fa" :class="sortKey === 'email' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
-                  </th>
-                  <th class="cell-status text-center sortable" @click="sortBy('ativo')">
-                    STATUS
-                    <i class="fa" :class="sortKey === 'ativo' ? (sortOrder === 'asc' ? 'fa-sort-amount-asc' : 'fa-sort-amount-desc') : 'fa-sort text-muted'"></i>
-                  </th>
-                  <th class="cell-actions text-center">AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="(item, index) in voluntariosOrdenados">
-                  <tr
-                    :key="'row-' + item.id"
-                    @click="toggleRow(item.id)"
-                    class="clickable-row-group"
-                    :class="{'row-group-expanded': expandedRows.includes(item.id)}"
-                  >
-                    <div class="main-row-data">
-                      <div class="cell-data cell-arrow">
-                        <i class="fa fa-chevron-right text-muted arrow-icon" :class="{'rotate-arrow': expandedRows.includes(item.id)}"></i>
-                      </div>
-                      <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
-                      <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
-                      <div class="cell-data cell-email">{{ item.email }}</div>
-                      <div class="cell-data cell-status text-center">
-                        <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
-                          {{ item.ativo ? 'Ativo' : 'Inativo' }}
-                        </span>
-                      </div>
-                      <div class="cell-data cell-actions text-center" @click.stop>
-                        <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
-                          <i class="fa fa-edit fa-lg"></i>
-                        </button>
-                        <button class="btn btn-danger btn-link btn-xs"
-                                title="Inativar"
-                                :disabled="!item.ativo"
-                                @click="handleInactivate(item)">
-                          <i class="fa fa-ban fa-lg"></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div v-if="expandedRows.includes(item.id)" class="full-width-dropdown animated fadeInFast" @click.stop>
-                      <div class="detail-container">
-                        <h5 class="detail-section-title">
-                          <i class="fa fa-id-card text-info mr-2"></i> Informações Detalhadas
-                        </h5>
-
-                        <div class="row m-0 mt-3">
-                          <div class="col-12 col-sm-6 col-md-3 info-box">
-                            <span class="info-label">CPF</span>
-                            <p class="info-value">{{ item.cpf || 'Não informado' }}</p>
-                          </div>
-                          <div class="col-12 col-sm-6 col-md-3 info-box">
-                            <span class="info-label">Data de Nascimento</span>
-                            <p class="info-value">{{ formatarData(item.dataNascimento) || 'Não informada' }}</p>
-                          </div>
-                          <div class="col-12 col-sm-6 col-md-3 info-box">
-                            <span class="info-label">Ocupação / Cargo</span>
-                            <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
-                          </div>
+              <table class="table text-nowrap table-flexbox">
+                <thead>
+                  <tr class="header-flex-row">
+                    <th class="cell-arrow"></th>
+                    <th class="cell-name sortable" @click="sortBy('nome')">
+                      NOME
+                      <i class="fa" :class="sortKey === 'nome' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
+                    </th>
+                    <th class="cell-phone d-none d-md-flex">TELEFONE</th>
+                    <th class="cell-email sortable" @click="sortBy('email')">
+                      E-MAIL
+                      <i class="fa" :class="sortKey === 'email' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
+                    </th>
+                    <th class="cell-status text-center sortable" @click="sortBy('ativo')">
+                      STATUS
+                      <i class="fa" :class="sortKey === 'ativo' ? (sortOrder === 'asc' ? 'fa-sort-amount-asc' : 'fa-sort-amount-desc') : 'fa-sort text-muted'"></i>
+                    </th>
+                    <th class="cell-actions text-center">AÇÕES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="item in voluntariosOrdenados">
+                    <tr
+                      :key="'row-' + item.id"
+                      @click="toggleRow(item.id)"
+                      class="clickable-row-group"
+                      :class="{'row-group-expanded': expandedRows.includes(item.id)}"
+                    >
+                      <div class="main-row-data">
+                        <div class="cell-data cell-arrow">
+                          <i class="fa fa-chevron-right text-muted arrow-icon" :class="{'rotate-arrow': expandedRows.includes(item.id)}"></i>
                         </div>
+                        <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
+                        <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
+                        <div class="cell-data cell-email">{{ item.email }}</div>
+                        <div class="cell-data cell-status text-center">
+                          <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
+                            {{ item.ativo ? 'Ativo' : 'Inativo' }}
+                          </span>
+                        </div>
+                        <div class="cell-data cell-actions text-center" @click.stop>
+                          <button class="btn btn-warning btn-link btn-xs" title="Editar" @click="handleEdit(item)">
+                            <i class="fa fa-edit fa-lg"></i>
+                          </button>
+                          <button class="btn btn-danger btn-link btn-xs"
+                                  title="Inativar"
+                                  :disabled="!item.ativo"
+                                  @click="handleInactivate(item)">
+                            <i class="fa fa-ban fa-lg"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div v-if="expandedRows.includes(item.id)" class="full-width-dropdown animated fadeInFast" @click.stop>
+                        <div class="detail-container">
+                          <h5 class="detail-section-title">
+                            <i class="fa fa-id-card text-info mr-2"></i> Informações Detalhadas
+                          </h5>
+
+                          <!-- Linha Única de Dados Pessoais e Sistema -->
                           <div class="row m-0 mt-3">
                             <div class="col-12 col-sm-6 col-md-3 info-box">
                               <span class="info-label">CPF</span>
@@ -108,49 +95,46 @@
                               <span class="info-label">Ocupação / Cargo</span>
                               <p class="info-value">{{ item.ocupacao || 'Não informada' }}</p>
                             </div>
-                            <div v-if="item.usuario" class="col-12 col-sm-6 col-md-3 info-box">
+                            <div class="col-12 col-sm-6 col-md-3 info-box">
                               <span class="info-label">Usuário do Sistema</span>
-                              <p class="info-value text-info">@{{ item.usuario.username }}</p>
+                              <p class="info-value text-info">
+                                {{ item.usuario ? '@' + item.usuario.username : 'Não associado' }}
+                              </p>
                             </div>
                           </div>
 
-                        <div class="row m-0 mt-3">
-                          <div class="col-12 info-box">
-                            <span class="info-label">Observações Internas</span>
-                            <p class="obs-text">{{ item.observacoes || 'Nenhuma observação cadastrada para este voluntário.' }}</p>
+                          <!-- Observações -->
+                          <div class="row m-0 mt-3">
+                            <div class="col-12 info-box">
+                              <span class="info-label">Observações Internas</span>
+                              <p class="obs-text">{{ item.observacoes || 'Nenhuma observação cadastrada para este voluntário.' }}</p>
+                            </div>
                           </div>
-                        </div>
 
-                        <!-- Perfils -->
-                         <div class="row m-0 mt-3">
-                          <div class="col-12 col-sm-6 info-box">
-                            <span class="info-label">Perfis de Acesso ao Sistema</span>
-                            <p class="info-value">
-                              <template v-if="item.perfisAcesso && item.perfisAcesso.length > 0">
-                                <span v-for="perfil in item.perfisAcesso" :key="perfil" class="badge badge-info mr-1">
-                                  {{ perfil }}
-                                </span>
-                              </template>
-                              <template v-else>
-                                <span class="text-muted font-italic">Sem acesso ao sistema configurado</span>
-                              </template>
-                            </p>
+                          <!-- Perfis de Acesso -->
+                          <div class="row m-0 mt-3">
+                            <div class="col-12 col-sm-6 info-box">
+                              <span class="info-label">Perfis de Acesso ao Sistema</span>
+                              <p class="info-value">
+                                <template v-if="item.perfisAcesso && item.perfisAcesso.length > 0">
+                                  <span v-for="perfil in item.perfisAcesso" :key="perfil" class="badge badge-info mr-1">
+                                    {{ perfil }}
+                                  </span>
+                                </template>
+                                <template v-else>
+                                  <span class="text-muted font-italic">Sem acesso ao sistema configurado</span>
+                                </template>
+                              </p>
+                            </div>
                           </div>
+
                         </div>
-                        <!-- Perfils -->
                       </div>
-                    </div>
+                    </tr>
                   </template>
-                </div>
-
-              </div>
+                </tbody>
+              </table>
             </div>
-                    </div>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
 
             <div v-if="!loading && tableData.data.length === 0" class="text-center p-4 text-muted">
               Nenhum registro encontrado.
@@ -160,6 +144,7 @@
       </div>
     </div>
 
+    <!-- Modal de Inativação -->
     <div v-if="modalInativar.show" class="custom-modal-backdrop d-flex align-items-center justify-content-center">
       <div class="custom-modal-card animated fadeIn">
         <div class="modal-icon-wrapper text-danger">
@@ -168,7 +153,7 @@
         <h3 class="modal-title">Desativar Voluntário</h3>
         <p class="modal-text">
           Você está prestes a desativar <strong>{{ modalInativar.item ? modalInativar.item.nome : '' }}</strong>.<br>
-          Este registro não constará mais na lista de voluntários activos.
+          Este registro não constará mais na lista de voluntários ativos.
         </p>
         <div class="modal-actions-buttons">
           <button class="btn btn-neutral btn-fill" @click="fecharModalInativar">Cancelar</button>
@@ -183,147 +168,142 @@
 </template>
 
 <script>
-  import Card from 'src/components/Cards/Card.vue'
-  import axios from 'axios'
+import Card from 'src/components/Cards/Card.vue'
+import axios from 'axios'
 
-  export default {
-    components: { Card },
-    data () {
-      return {
-        loading: false,
-        tableData: {
-          columns: [],
-          data: []
-        },
-        expandedRows: [],
-        modalInativar: {
-          show: false,
-          submitting: false,
-          item: null
-        },
-        // NOVAS VARIÁVEIS DE ORDENAÇÃO
-        sortKey: 'nome',
-        sortOrder: 'asc'
+export default {
+  components: { Card },
+  data () {
+    return {
+      loading: false,
+      tableData: {
+        columns: [],
+        data: []
+      },
+      expandedRows: [],
+      modalInativar: {
+        show: false,
+        submitting: false,
+        item: null
+      },
+      sortKey: 'nome',
+      sortOrder: 'asc'
+    }
+  },
+  computed: {
+    voluntariosOrdenados() {
+      if (!this.tableData.data) return [];
+
+      return [...this.tableData.data].sort((a, b) => {
+        let valorA = a[this.sortKey] || '';
+        let valorB = b[this.sortKey] || '';
+
+        if (typeof valorA === 'string') valorA = valorA.toLowerCase();
+        if (typeof valorB === 'string') valorB = valorB.toLowerCase();
+
+        if (valorA < valorB) return this.sortOrder === 'asc' ? -1 : 1;
+        if (valorA > valorB) return this.sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+  },
+  watch: {
+    '$route': 'fetchData'
+  },
+  methods: {
+    async fetchData() {
+      this.loading = true;
+      try {
+        const response = await axios.get(`/api/voluntarios`);
+        this.tableData.data = response.data;
+      } catch (error) {
+        console.error("Erro ao carregar dados", error);
+      } finally {
+        this.loading = false;
       }
     },
-    // NOVO BLOCO COMPUTED
-    computed: {
-      voluntariosOrdenados() {
-        if (!this.tableData.data) return [];
 
-        return [...this.tableData.data].sort((a, b) => {
-          let valorA = a[this.sortKey] || '';
-          let valorB = b[this.sortKey] || '';
+    toggleRow(id) {
+      const index = this.expandedRows.indexOf(id);
+      if (index > -1) {
+        this.expandedRows.splice(index, 1);
+      } else {
+        this.expandedRows.push(id);
+      }
+    },
 
-          // Ignora maiúsculas/minúsculas na ordenação de texto
-          if (typeof valorA === 'string') valorA = valorA.toLowerCase();
-          if (typeof valorB === 'string') valorB = valorB.toLowerCase();
+    formatarData(dataIso) {
+      if (!dataIso) return 'Não informada';
+      const partes = dataIso.split('-');
+      if (partes.length === 3) {
+        const [ano, mes, dia] = partes;
+        return `${dia}/${mes}/${ano}`;
+      }
+      return dataIso;
+    },
 
-          if (valorA < valorB) return this.sortOrder === 'asc' ? -1 : 1;
-          if (valorA > valorB) return this.sortOrder === 'asc' ? 1 : -1;
-          return 0;
+    handleEdit(item) {
+      this.$router.push(`/admin/voluntarios/editar/${item.id}`);
+    },
+
+    handleInactivate(item) {
+      this.modalInativar.item = item;
+      this.modalInativar.show = true;
+    },
+
+    fecharModalInativar() {
+      this.modalInativar.show = false;
+      this.modalInativar.item = null;
+      this.modalInativar.submitting = false;
+    },
+
+    async confirmarInativacao() {
+      const item = this.modalInativar.item;
+      if (!item) return;
+
+      this.modalInativar.submitting = true;
+      try {
+        const endpoint = this.$route.path.replace('/admin/', '');
+        await axios.delete(`/api/${endpoint}/${item.id}`);
+
+        this.fecharModalInativar();
+        this.$notifications.notify({
+          message: `<span><b>Sucesso!</b> O voluntário ${item.nome} foi desativado.</span>`,
+          icon: 'fa fa-check-circle',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'success'
+        });
+        this.fetchData();
+      } catch (error) {
+        console.error("Erro ao desativar:", error);
+        this.modalInativar.submitting = false;
+        this.$notifications.notify({
+          message: `<span><b>Erro</b> Não foi possível inativar o registro.</span>`,
+          icon: 'fa fa-exclamation-triangle',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'danger'
         });
       }
     },
-    watch: {
-      '$route': 'fetchData'
-    },
-    methods: {
-      async fetchData() {
-        this.loading = true;
-        try {
-          const endpoint = this.$route.path.replace('/admin/', '');
-          const response = await axios.get(`/api/voluntarios`);
-          this.tableData.data = response.data;
-        } catch (error) {
-          console.error("Erro ao carregar dados", error);
-        } finally {
-          this.loading = false;
-        }
-      },
 
-      toggleRow(id) {
-        const index = this.expandedRows.indexOf(id);
-        if (index > -1) {
-          this.expandedRows.splice(index, 1);
-        } else {
-          this.expandedRows.push(id);
-        }
-      },
-
-      formatarData(dataIso) {
-        if (!dataIso) return 'Não informada';
-        const partes = dataIso.split('-');
-        if (partes.length === 3) {
-          const [ano, mes, dia] = partes;
-          return `${dia}/${mes}/${ano}`;
-        }
-        return dataIso;
-      },
-
-      handleEdit(item) {
-        this.$router.push(`/admin/voluntarios/editar/${item.id}`);
-      },
-
-      handleInactivate(item) {
-        this.modalInativar.item = item;
-        this.modalInativar.show = true;
-      },
-
-      fecharModalInativar() {
-        this.modalInativar.show = false;
-        this.modalInativar.item = null;
-        this.modalInativar.submitting = false;
-      },
-
-      async confirmarInativacao() {
-        const item = this.modalInativar.item;
-        if (!item) return;
-
-        this.modalInativar.submitting = true;
-        try {
-          const endpoint = this.$route.path.replace('/admin/', '');
-          await axios.delete(`/api/${endpoint}/${item.id}`);
-
-          this.fecharModalInativar();
-          this.$notifications.notify({
-            message: `<span><b>Sucesso!</b> O voluntário ${item.nome} foi desativado.</span>`,
-            icon: 'fa fa-check-circle',
-            horizontalAlign: 'right',
-            verticalAlign: 'top',
-            type: 'success'
-          });
-          this.fetchData();
-        } catch (error) {
-          console.error("Erro ao desativar:", error);
-          this.modalInativar.submitting = false;
-          this.$notifications.notify({
-            message: `<span><b>Erro</b> Não foi possível inativar o registro.</span>`,
-            icon: 'fa fa-exclamation-triangle',
-            horizontalAlign: 'right',
-            verticalAlign: 'top',
-            type: 'danger'
-          });
-        }
-      },
-      // NOVO MÉTODO DE ORDENAÇÃO
-      sortBy(key) {
-        if (this.sortKey === key) {
-          this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
-        } else {
-          this.sortKey = key;
-          this.sortOrder = 'asc';
-        }
+    sortBy(key) {
+      if (this.sortKey === key) {
+        this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.sortKey = key;
+        this.sortOrder = 'asc';
       }
-    },
-    mounted() {
-      this.fetchData();
     }
+  },
+  mounted() {
+    this.fetchData();
   }
+}
 </script>
 
 <style scoped>
-/* Torna os cabeçalhos clicáveis */
 th.sortable {
   cursor: pointer;
   user-select: none;
@@ -331,23 +311,12 @@ th.sortable {
 }
 
 th.sortable:hover {
-  color: #00bcd4 !important; /* Cor info do seu tema */
+  color: #00bcd4 !important;
 }
 
 th.sortable i {
   margin-left: 5px;
   font-size: 0.85em;
-}
-
-/* Ajustes responsivos para evitar colunas espremidas em telas pequenas (< 768px) */
-@media (max-width: 767px) {
-  .cell-name  { width: 40%; } /* Pega o espaço do telefone */
-  .cell-email { width: 35%; }
-  .cell-status{ width: 15%; }
-  .cell-actions{ width: 10%; min-width: 70px;}
-
-  /* Ajusta o texto da linha expandida para não quebrar */
-  .info-box { margin-bottom: 20px; }
 }
 
 .custom-table-wrapper {
@@ -412,32 +381,12 @@ th.sortable i {
   overflow: hidden;
 }
 
-/* Definição exata das larguras das colunas */
 .cell-arrow    { flex: 0 0 5%;  width: 5%;  min-width: 45px; }
 .cell-name     { flex: 0 0 25%; width: 25%; }
 .cell-phone    { flex: 0 0 20%; width: 20%; }
 .cell-email    { flex: 0 0 30%; width: 30%; }
 .cell-status   { flex: 0 0 10%; width: 10%; text-align: center; }
 .cell-actions  { flex: 0 0 10%; width: 10%; text-align: center; }
-
-/* Estilização dos Badges de Acesso Customizados */
-.badge-acesso {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 600;
-}
-.badge-acesso.liberated, .badge-acesso.liberado {
-  background-color: #e6f9f3;
-  color: #10b981;
-}
-.badge-acesso.bloqueado {
-  background-color: #f3f4f6;
-  color: #6b7280;
-}
 
 .full-width-dropdown {
   flex: 0 0 100% !important;
@@ -527,19 +476,16 @@ th.sortable i {
 .modal-actions-buttons { display: flex; justify-content: center; gap: 15px; }
 .modal-actions-buttons .btn { padding: 10px 24px; font-weight: 600; min-width: 120px; }
 
-/* Ajustes responsivos para evitar colunas espremidas em telas pequenas (< 768px) */
 @media (max-width: 767px) {
   .cell-phone {
     display: none !important;
   }
 
-  /* Redistribui o espaço do telefone para as outras colunas */
   .cell-name  { flex: 0 0 35%; width: 35%; }
   .cell-email { flex: 0 0 35%; width: 35%; }
   .cell-status{ flex: 0 0 15%; width: 15%; }
   .cell-actions{ flex: 0 0 15%; width: 15%; min-width: 70px; }
 
-  /* Ajusta o texto da linha expandida para não quebrar */
   .info-box { margin-bottom: 20px; }
 }
 </style>

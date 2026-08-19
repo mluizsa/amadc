@@ -63,7 +63,7 @@
                   <div class="form-group">
                     <label>Perfis de Acesso ao Sistema</label>
                     <div class="p-2 border rounded bg-light">
-                      <template v-if="form.perfisAcesso && form.perfisAcesso.length > 0">
+                      <template v-if="form.perfisAcesso && form.perfisAcesso.length > 0">   
                         <span v-for="perfil in form.perfisAcesso" :key="perfil" class="badge badge-info mr-2 p-2">
                           {{ perfil }}
                         </span>

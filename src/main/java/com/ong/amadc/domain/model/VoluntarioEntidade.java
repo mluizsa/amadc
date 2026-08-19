@@ -45,11 +45,7 @@ public class VoluntarioEntidade extends BaseEntity {
     @Column(name = "volu_ativo")
     private Boolean ativo = true;
 
-    @OneToOne(mappedBy = "voluntario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "usu_id")
-    private UsuarioEntidade usuario;
-
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true) // Adicionado CascadeType.ALL e orphanRemoval
     @JoinColumn(name = "usu_id")
     @org.hibernate.envers.Audited(targetAuditMode = org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED)
     private UsuarioEntidade usuario;
