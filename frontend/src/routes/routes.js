@@ -50,7 +50,7 @@ const routes = [
         component: AnimalList,
         meta: {
           icon: 'fa fa-paw',
-          permission: 'VOLUNTARIO_ANIMAIS',
+          permission: 'ANIMAL_READ',
           hidden: false,
           isHeader: true,
           headerTitle: 'Animais'
@@ -61,7 +61,7 @@ const routes = [
         name: 'Novo Animal',
         component: AnimalForm,
         meta: {
-          permission: 'VOLUNTARIO_ANIMAIS',
+          permission: 'ANIMAL_READ',
           hidden: true
         }
       },
@@ -70,7 +70,7 @@ const routes = [
         name: 'Editar Animal',
         component: AnimalForm,
         meta: {
-          permission: 'VOLUNTARIO_ANIMAIS',
+          permission: 'ANIMAL_READ',
           hidden: true
         }
       },
@@ -79,7 +79,7 @@ const routes = [
         name: 'Detalhes do Animal',
         component: AnimalDetails,
         meta: {
-          permission: 'VOLUNTARIO_ANIMAIS',
+          permission: 'ANIMAL_READ',
           hidden: true
         }
       },
@@ -92,7 +92,7 @@ const routes = [
         component: Overview,
         meta: {
           icon: 'nc-icon nc-money-coins',
-          permission: 'VOLUNTARIO_FINANCEIRO',
+          permission: 'FINANCE_WRITE',
           hidden: false,
           isHeader: true,
           headerTitle: 'Gestão Financeira'
@@ -107,7 +107,7 @@ const routes = [
         component: VoluntarioList,
         meta: {
           icon: 'nc-icon nc-badge',
-          permission: 'VOLUNTARIO_READ',
+          permission: 'ADMIN',
           hidden: false,
           isHeader: true,
           headerTitle: 'RH | Gestão'
@@ -118,13 +118,19 @@ const routes = [
         path: 'voluntarios/novo',
         name: 'Novo Voluntário',
         component: VoluntarioForm,
-        meta: { permission: 'VOLUNTARIO_WRITE', hidden: true }
+        meta: { 
+          permission: 'ADMIN',
+          hidden: true 
+        }
       },
       {
         path: 'voluntarios/editar/:id',
         name: 'Editar Voluntário',
         component: VoluntarioForm,
-        meta: { permission: 'VOLUNTARIO_WRITE', hidden: true }
+        meta: { 
+          permission: 'ADMIN',
+          hidden: true 
+        }
       },
       /* =========================================================================
          PERFIL DO USUÁRIO

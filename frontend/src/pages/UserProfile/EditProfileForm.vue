@@ -1,79 +1,66 @@
 <template>
   <card>
-    <h4 slot="header" class="card-title">Edit Profile</h4>
+    <h4 slot="header" class="card-title">Meu Perfil</h4>
     <form>
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-6">
           <base-input type="text"
-                    label="Company"
-                    :disabled="true"
-                    placeholder="Light dashboard"
-                    v-model="user.company">
+                    label="Nome Completo"
+                    placeholder="Seu nome"
+                    v-model="user.nome">
           </base-input>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6">
           <base-input type="text"
-                    label="Username"
+                    label="Nome de Usuário (Username)"
+                    :disabled="true"
                     placeholder="Username"
                     v-model="user.username">
           </base-input>
         </div>
-        <div class="col-md-4">
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
           <base-input type="email"
-                    label="Email"
-                    placeholder="Email"
+                    label="E-mail"
+                    placeholder="E-mail"
                     v-model="user.email">
           </base-input>
         </div>
+        <div class="col-md-6">
+          <base-input type="text"
+                    label="Telefone"
+                    placeholder="Telefone"
+                    v-model="user.telefone">
+          </base-input>
+        </div>
       </div>
 
       <div class="row">
         <div class="col-md-6">
           <base-input type="text"
-                    label="First Name"
-                    placeholder="First Name"
-                    v-model="user.firstName">
+                    label="CPF"
+                    :disabled="true"
+                    placeholder="CPF"
+                    v-model="user.cpf">
           </base-input>
         </div>
         <div class="col-md-6">
           <base-input type="text"
-                    label="Last Name"
-                    placeholder="Last Name"
-                    v-model="user.lastName">
+                    label="Ocupação"
+                    placeholder="Sua ocupação"
+                    v-model="user.ocupacao">
           </base-input>
         </div>
       </div>
 
+      <!-- Nova linha adicionada para a Data de Nascimento -->
       <div class="row">
-        <div class="col-md-12">
-          <base-input type="text"
-                    label="Address"
-                    placeholder="Home Address"
-                    v-model="user.address">
-          </base-input>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-4">
-          <base-input type="text"
-                    label="City"
-                    placeholder="City"
-                    v-model="user.city">
-          </base-input>
-        </div>
-        <div class="col-md-4">
-          <base-input type="text"
-                    label="Country"
-                    placeholder="Country"
-                    v-model="user.country">
-          </base-input>
-        </div>
-        <div class="col-md-4">
-          <base-input type="number"
-                    label="Postal Code"
-                    placeholder="ZIP Code"
-                    v-model="user.postalCode">
+        <div class="col-md-6">
+          <base-input type="date"
+                    label="Data de Nascimento"
+                    v-model="user.dataNascimento">
           </base-input>
         </div>
       </div>
@@ -81,25 +68,29 @@
       <div class="row">
         <div class="col-md-12">
           <div class="form-group">
-            <label>About Me</label>
+            <label>Observações / Sobre mim</label>
             <textarea rows="5" class="form-control border-input"
-                      placeholder="Here can be your description"
-                      v-model="user.aboutMe">
-              </textarea>
+                      placeholder="Informações adicionais..."
+                      v-model="user.observacoes">
+            </textarea>
           </div>
         </div>
       </div>
+
       <div class="text-center">
         <button type="submit" class="btn btn-info btn-fill float-right" @click.prevent="updateProfile">
-          Update Profile
+          Salvar Alterações
         </button>
       </div>
       <div class="clearfix"></div>
     </form>
   </card>
 </template>
+
 <script>
   import Card from 'src/components/Cards/Card.vue'
+  import AuthService from '../../services/AuthService'
+  import axios from 'axios'
 
   export default {
     components: {
@@ -108,27 +99,65 @@
     data () {
       return {
         user: {
-          company: 'Light dashboard',
-          username: 'michael23',
+          username: '',
           email: '',
-          firstName: 'Mike',
-          lastName: 'Andrew',
-          address: 'Melbourne, Australia',
-          city: 'melbourne',
-          country: 'Australia',
-          postalCode: '',
-          aboutMe: `Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.`
+          nome: '',
+          cpf: '',
+          telefone: '',
+          ocupacao: '',
+          dataNascimento: '',
+          observacoes: ''
         }
       }
     },
+    mounted () {
+      this.carregarDadosUsuario()
+    },
     methods: {
-      updateProfile () {
-        alert('Your data: ' + JSON.stringify(this.user))
+      async carregarDadosUsuario () {
+        try {
+          const dados = await AuthService.getMe()
+          this.user.username = dados.username || ''
+          this.user.email = dados.email || ''
+          this.user.nome = dados.nome || dados.nomeCompleto || ''
+          this.user.cpf = dados.cpf || ''
+          this.user.telefone = dados.telefone || ''
+          this.user.ocupacao = dados.ocupacao || ''
+          this.user.dataNascimento = dados.dataNascimento || ''
+          this.user.observacoes = dados.observacoes || ''
+        } catch (error) {
+          console.error("Erro ao carregar dados do perfil:", error)
+        }
+      },
+      async updateProfile () {
+        try {
+          await axios.put('/api/voluntarios/me', this.user)
+          
+          this.$notify({
+            message: 'Perfil atualizado com sucesso!',
+            type: 'success',
+            verticalAlign: 'top',
+            horizontalAlign: 'right'
+          })
+
+          // Aguarda um breve instante para o usuário ver o toast e recarrega a página
+          setTimeout(() => {
+            window.location.reload()
+          }, 1000)
+        } catch (error) {
+          console.error("Erro ao atualizar perfil:", error)
+          
+          this.$notify({
+            message: 'Não foi possível atualizar o perfil.',
+            type: 'danger',
+            verticalAlign: 'top',
+            horizontalAlign: 'right'
+          })
+        }
       }
     }
   }
-
 </script>
-<style>
 
+<style>
 </style>

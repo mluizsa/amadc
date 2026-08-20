@@ -1,9 +1,11 @@
 package com.ong.amadc.domain.service;
 
+import com.ong.amadc.api.dto.response.MeResponseDTO;
 import com.ong.amadc.config.infra.security.TokenService;
 import com.ong.amadc.domain.model.UsuarioEntidade;
 import com.ong.amadc.api.dto.request.LoginRequestDTO;
-import com.ong.amadc.api.dto.response.UsuarioDetalhesDTO;
+import com.ong.amadc.domain.model.VoluntarioEntidade;
+import com.ong.amadc.domain.repository.VoluntarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AuthService {
 
@@ -25,6 +29,9 @@ public class AuthService {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private VoluntarioRepository voluntarioRepository;
 
     public ResponseEntity<?> login(LoginRequestDTO data) {
         try {
@@ -63,12 +70,14 @@ public class AuthService {
                 .body("Logout realizado com sucesso");
     }
 
-    public UsuarioDetalhesDTO obterDadosUsuarioLogado(Authentication auth) {
-        UsuarioEntidade user = (UsuarioEntidade) auth.getPrincipal();
-        var permissoes = auth.getAuthorities().stream()
+    public MeResponseDTO obterDadosUsuarioLogado(Authentication auth) {
+        UsuarioEntidade usuario = (UsuarioEntidade) auth.getPrincipal();
+        VoluntarioEntidade voluntario = voluntarioRepository.findByUsuario(usuario).orElse(null);
+        
+        List<String> perfis = auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        return new UsuarioDetalhesDTO(user.getId(), user.getUsername(), user.getEmail(), permissoes);
+        return MeResponseDTO.fromEntities(usuario, voluntario, perfis);
     }
 }

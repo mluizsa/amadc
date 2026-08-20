@@ -45,7 +45,21 @@ const router = new VueRouter({
 // --- TRAVA DE SEGURANÇA (Navigation Guard) ---
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    next();
+    const userPermissions = JSON.parse(localStorage.getItem('user_permissions') || '[]');
+    const requiredPermission = to.meta.permission;
+
+    if (requiredPermission) {
+      // Se o usuário é ADMIN ou possui a permissão exigida, libera
+      const hasAccess = userPermissions.includes('ADMIN') || userPermissions.includes(requiredPermission);
+
+      if (hasAccess) {
+        next();
+      } else {
+        next('/admin/overview'); // Redireciona se não tiver acesso
+      }
+    } else {
+      next();
+    }
   } else {
     next();
   }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication; // Importar
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,10 +53,20 @@ public class VoluntarioController {
         return ResponseEntity.ok(voluntarios);
     }
 
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()") // Apenas usuários autenticados podem chamar
+    @Operation(summary = "Atualizar dados do próprio voluntário logado")
+    public ResponseEntity<VoluntarioResponseDTO> atualizarMeuPerfil(
+            Authentication auth,
+            @RequestBody @Valid VoluntarioRequestDTO dto) {
+        var atualizado = service.atualizarPerfilLogado(auth, dto);
+        return ResponseEntity.ok(new VoluntarioResponseDTO(atualizado));
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasPermission(null, 'VOLUNTARIO_WRITE')")
-    @Operation(summary = "Edição do voluntário",
-            description = "Edição de voluntários na ONG")
+    @Operation(summary = "Edição do voluntário (Admin)",
+            description = "Edição de voluntários na ONG por um administrador.")
     public ResponseEntity<VoluntarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid VoluntarioRequestDTO dto) {
         var atualizado = service.atualizar(id, dto);
         return ResponseEntity.ok(new VoluntarioResponseDTO(atualizado));

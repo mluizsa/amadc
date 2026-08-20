@@ -6,21 +6,43 @@
 </template>
 
 <script>
-  import routes from './routes/routes'; // Importe suas rotas
+  import routes from './routes/routes';
 
   export default {
     watch: {
-      // Sempre que mudar a rota, garantimos que o menu está sincronizado
-      // Útil caso o login aconteça e as permissões mudem
       '$route': 'updateMenu'
     },
     methods: {
       updateMenu() {
-        // Aqui você pegaria as permissões do seu Store (Pinia/Vuex) ou do localStorage
-        // Por enquanto, vamos passar um array com 'ADMIN' para testar se o menu aparece
-        const userPermissions = ['ADMIN', 'VOLUNTARIO_ANIMAIS', 'VOLUNTARIO_FINANCEIRO'];
+        const storedPermissions = localStorage.getItem('user_permissions');
+        const userPermissions = storedPermissions ? JSON.parse(storedPermissions) : [];
 
-        this.$sidebar.setLinksFromRoutes(routes, userPermissions);
+        // Verifica se o usuário tem privilégio total (ADMIN)
+        const isAdmin = userPermissions.includes('ADMIN');
+
+        // Filtra as rotas com base nas permissões reais do usuário
+        const filteredRoutes = routes.map(route => {
+          if (route.children) {
+            const validChildren = route.children.filter(child => {
+              // Se a rota não exige permissão, exibe normalmente
+              if (!child.meta || !child.meta.permission) return true;
+
+              const requiredPerm = child.meta.permission;
+
+              // Admin vê tudo, senão checa se possui a permissão exata
+              return isAdmin || userPermissions.includes(requiredPerm);
+            });
+
+            return {
+              ...route,
+              children: validChildren
+            };
+          }
+          return route;
+        });
+
+        // Passa as rotas filtradas e as permissões para o plugin
+        this.$sidebar.setLinksFromRoutes(filteredRoutes, userPermissions);
       }
     },
     mounted() {
@@ -28,31 +50,3 @@
     }
   }
 </script>
-<style lang="scss">
-  .vue-notifyjs.notifications{
-    .list-move {
-      transition: transform 0.3s, opacity 0.4s;
-    }
-    .list-item {
-      display: inline-block;
-      margin-right: 10px;
-
-    }
-    .list-enter-active {
-      transition: transform 0.2s ease-in, opacity 0.4s ease-in;
-    }
-    .list-leave-active {
-      transition: transform 1s ease-out, opacity 0.4s ease-out;
-    }
-
-    .list-enter {
-      opacity: 0;
-      transform: scale(1.1);
-
-    }
-    .list-leave-to {
-      opacity: 0;
-      transform: scale(1.2, 0.7);
-    }
-  }
-</style>

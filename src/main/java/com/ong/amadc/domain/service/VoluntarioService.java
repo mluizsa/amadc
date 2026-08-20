@@ -4,10 +4,12 @@ import com.ong.amadc.api.dto.request.VoluntarioRequestDTO;
 import com.ong.amadc.api.dto.response.VoluntarioResponseDTO;
 import com.ong.amadc.config.infra.exception.BusinessException;
 import com.ong.amadc.domain.business.VoluntarioBusiness;
+import com.ong.amadc.domain.model.UsuarioEntidade;
 import com.ong.amadc.domain.model.VoluntarioEntidade;
 import com.ong.amadc.domain.repository.VoluntarioRepository;
 import com.ong.amadc.domain.validator.VoluntarioValidator;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +81,23 @@ public class VoluntarioService {
     }
 
     @Transactional
+    public VoluntarioEntidade atualizarPerfilLogado(Authentication auth, VoluntarioRequestDTO dto) {
+        // 1. Pega o usuário logado a partir do token/principal
+        UsuarioEntidade usuarioLogado = (UsuarioEntidade) auth.getPrincipal();
+
+        // 2. Busca o voluntário associado a este usuário
+        var voluntario = repository.findByUsuario(usuarioLogado)
+                .orElseThrow(() -> new EntityNotFoundException("Perfil de voluntário não encontrado para o usuário logado."));
+
+        // 3. Copia apenas os campos que o próprio usuário pode alterar
+        // (CPF, nome, data de nascimento, telefone, e-mail, ocupação, observações)
+        BeanUtils.copyProperties(dto, voluntario, "id", "ativo", "usuario", "dataCriacao", "registradoPor");
+
+        // 4. Salva as alterações
+        return repository.save(voluntario);
+    }
+
+    @Transactional
     public void desativar(Long id) {
         var voluntario = repository.findById(id)
                 .orElseThrow(() -> new BusinessException("Voluntário não encontrado"));
@@ -88,6 +107,12 @@ public class VoluntarioService {
         }
 
         voluntario.setAtivo(false);
+
+        // Inativa o usuário associado, se houver
+        if (voluntario.getUsuario() != null) {
+            voluntario.getUsuario().setAtivo(false);
+        }
+
         repository.save(voluntario);
     }
 
