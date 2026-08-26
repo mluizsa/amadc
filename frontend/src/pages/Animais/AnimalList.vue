@@ -111,14 +111,28 @@
             <div v-else-if="animais.length > 0" class="table-responsive custom-table-wrapper animated fadeIn">
               <div class="table text-nowrap table-flexbox mb-0">
                 
-                <!-- Cabeçalho da Tabela Flexbox -->
+                <!-- Cabeçalho da Tabela Flexbox com Ordenação -->
                 <div class="header-flex-row">
                   <div class="cell-arrow"></div>
-                  <div class="cell-nome-animal">NOME</div>
-                  <div class="cell-especie">ESPÉCIE / RAÇA</div>
-                  <div class="cell-idade">IDADE ESTIMADA</div>
+                  
+                  <div class="cell-nome-animal sortable-header" @click="ordenar('nome')">
+                    NOME <i class="fa ml-1" :class="obterIconeOrdenacao('nome')"></i>
+                  </div>
+                  
+                  <div class="cell-especie sortable-header" @click="ordenar('especie')">
+                    ESPÉCIE / RAÇA <i class="fa ml-1" :class="obterIconeOrdenacao('especie')"></i>
+                  </div>
+                  
+                  <div class="cell-idade sortable-header" @click="ordenar('idadeEstimada')">
+                    IDADE ESTIMADA <i class="fa ml-1" :class="obterIconeOrdenacao('idadeEstimada')"></i>
+                  </div>
+                  
                   <div class="cell-castrado text-center">CASTRADO</div>
-                  <div class="cell-status-animal text-center">STATUS</div>
+                  
+                  <div class="cell-status-animal text-center sortable-header" @click="ordenar('status')">
+                    STATUS <i class="fa ml-1" :class="obterIconeOrdenacao('status')"></i>
+                  </div>
+                  
                   <div class="cell-actions-animal text-center">AÇÕES</div>
                 </div>
 
@@ -134,8 +148,12 @@
                         <i class="fa fa-chevron-right text-muted arrow-icon"></i>
                       </div>
                       
-                      <div class="cell-data cell-nome-animal text-dark">
+                      <div class="cell-data cell-nome-animal text-dark d-flex align-items-center">
                         <span class="font-weight-bold">{{ animal.nome }}</span>
+                        <!-- Indicativo pequeno de foto -->
+                        <span v-if="animal.fotosGaleria && animal.fotosGaleria.length > 0" title="Possui fotos registradas">
+                          <i class="fa fa-camera text-info small"></i>
+                        </span>
                       </div>
                       
                       <div class="cell-data cell-especie text-secondary font-weight-600">
@@ -263,12 +281,15 @@ export default {
       listaStatus: [],
       listaPortes: [],
       listaSexos: [],
+      // Parâmetros de Ordenação
+      ordenarPor: 'nome',
+      direcao: 'asc',
       filtro: {
         nome: '',
         statusId: '',
         porte: '',
         sexo: '',
-        apenasCastrados: false, // Controla o checkbox simples
+        apenasCastrados: false,
         possivelAdocao: false
       }
     }
@@ -291,9 +312,13 @@ export default {
     async fetchData() {
       this.loading = true;
       try {
+        // Formata o sort combinando campo e direção (ex: "nome,asc" ou "nome,desc")
+        const ordenacaoFormatada = this.ordenarPor ? `${this.ordenarPor},${this.direcao}` : null;
+
         const params = {
           page: this.paginaAtual,
           size: 10,
+          sort: ordenacaoFormatada, // <-- Enviando no padrão do Spring Data (campo,direcao)
           nome: this.filtro.nome || null,
           statusId: this.filtro.statusId || null,
           porte: this.filtro.porte || null,
@@ -301,7 +326,6 @@ export default {
           possivelAdocao: this.filtro.possivelAdocao ? true : null
         };
 
-        // Envia castrado=true apenas se o checkbox estiver ativo
         if (this.filtro.apenasCastrados) {
           params.castrado = true;
         }
@@ -318,6 +342,22 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    ordenar(campo) {
+      if (this.ordenarPor === campo) {
+        this.direcao = this.direcao === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.ordenarPor = campo;
+        this.direcao = 'asc';
+      }
+      this.paginaAtual = 0;
+      this.fetchData();
+    },
+    obterIconeOrdenacao(campo) {
+      if (this.ordenarPor !== campo) {
+        return 'fa-sort text-muted opacity-50';
+      }
+      return this.direcao === 'asc' ? 'fa-sort-up text-info' : 'fa-sort-down text-info';
     },
     formatarIdade(idade) {
       if (!idade) return 'Não informada';
@@ -354,6 +394,8 @@ export default {
       this.filtro.sexo = '';
       this.filtro.apenasCastrados = false;
       this.filtro.possivelAdocao = false;
+      this.ordenarPor = 'nome';
+      this.direcao = 'asc';
       this.paginaAtual = 0;
       this.fetchData();
     },
@@ -398,20 +440,30 @@ export default {
 .fadeIn { animation-name: fadeIn; }
 
 .table-flexbox { display: flex !important; flex-direction: column !important; width: 100% !important; }
-.header-flex-row { display: flex !important; width: 100% !important; border-bottom: 2px solid #e3e8ee; background-color: #f8f9fa; padding: 14px 0; font-weight: 700; color: #555; font-size: 11px; letter-spacing: 0.5px; }
+.header-flex-row { display: flex !important; width: 100% !important; border-bottom: 2px solid #e3e8ee; background-color: #f8f9fa; padding: 14px 0; font-weight: 700; color: #555; font-size: 11px; letter-spacing: 0.5px; align-items: center; }
 .clickable-row-group { display: flex !important; flex-wrap: wrap !important; width: 100% !important; border-bottom: 1px solid #edf2f7 !important; cursor: pointer; transition: all 0.15s ease-in-out; }
 .clickable-row-group:hover { background-color: #f4f6f9; }
 .clickable-row-group:hover .arrow-icon { color: #23ccef !important; transform: translateX(2px); }
 .main-row-data { display: flex !important; width: 100% !important; align-items: center; }
 .cell-data { padding: 14px 15px !important; font-size: 13.5px; }
 
+/* Estilos de Ordenação do Cabeçalho */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+.sortable-header:hover {
+  color: #23ccef !important;
+}
+
 /* Proporções equilibradas do Flexbox */
 .cell-arrow           { width: 4%; min-width: 40px; display: flex; justify-content: center; align-items: center; }
-.cell-nome-animal     { width: 24%; }
-.cell-especie         { width: 22%; }
-.cell-idade           { width: 14%; }
+.cell-nome-animal     { width: 24%; padding: 0 15px; }
+.cell-especie         { width: 22%; padding: 0 15px; }
+.cell-idade           { width: 14%; padding: 0 15px; }
 .cell-castrado        { width: 14%; }
-.cell-status-animal   { width: 11%; }
+.cell-status-animal   { width: 11%; padding: 0 15px; }
 .cell-actions-animal  { width: 11%; }
 
 .select-custom { height: 40px; border-radius: 4px; border: 1px solid #E3E3E3; color: #444; font-weight: 600; font-size: 13px; }
@@ -476,7 +528,7 @@ export default {
 /* Animação do Vue para abrir/fechar suavemente */
 .fade-collapse-enter-active, .fade-collapse-leave-active {
   transition: all 0.3s ease-in-out;
-  max-height: 300px; /* Altura máxima aproximada do bloco aberto */
+  max-height: 300px;
   overflow: hidden;
   opacity: 1;
 }

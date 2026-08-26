@@ -62,7 +62,7 @@ public class AnimalService {
 
     @Transactional(readOnly = true)
     public Page<AnimalResponseDTO> listarTodos(Pageable paginacao, AnimalFiltroRequest filtro) {
-        return animalRepository.findAllWithFilters(
+        Page<AnimalEntidade> animaisPage = animalRepository.findAllWithFilters(
                 paginacao,
                 filtro.nomeParaLike(),
                 filtro.statusId(),
@@ -70,7 +70,36 @@ public class AnimalService {
                 filtro.possivelAdocao(),
                 filtro.sexo(),
                 filtro.castrado()
-        ).map(animal -> AnimalResponseDTO.fromEntity(animal, animal.getUrlFotoCapa(), Collections.emptyList()));
+        );
+
+        // Mapeia cada animal da página aplicando a mesma lógica de busca de galeria e capa
+        return animaisPage.map(animal -> {
+            // Busca os arquivos/fotos do animal ordenados por data de criação
+            List<ArquivoSistemaEntidade> arquivos = arquivoSistemaRepository
+                    .findByAnimalIdOrderByDataCriacaoAscIdAsc(animal.getId());
+
+            // Converte para o DTO da galeria
+            List<FotoGaleriaResponseDTO> galeria = arquivos.stream()
+                    .map(arq -> new FotoGaleriaResponseDTO(
+                            arq.getId(),
+                            arq.getUrl(),
+                            arq.getIsCapa() != null && arq.getIsCapa(),
+                            arq.getDataCriacao()
+                    ))
+                    .collect(Collectors.toList());
+
+            // Define a foto de capa (priorizando o campo da entidade ou a flag isCapa)
+            String urlCapa = animal.getUrlFotoCapa();
+            if (urlCapa == null) {
+                urlCapa = arquivos.stream()
+                        .filter(arq -> arq.getIsCapa() != null && arq.getIsCapa())
+                        .map(ArquivoSistemaEntidade::getUrl)
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            return AnimalResponseDTO.fromEntity(animal, urlCapa, galeria);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -80,13 +109,14 @@ public class AnimalService {
 
         // 🎯 CORREÇÃO AQUI: Trocado o método antigo pelo método correto que busca direto pelo ID do animal
         List<ArquivoSistemaEntidade> arquivos = arquivoSistemaRepository
-                .findByAnimalIdOrderByDataCriacaoAsc(id);
+                .findByAnimalIdOrderByDataCriacaoAscIdAsc(id);
 
         List<FotoGaleriaResponseDTO> galeria = arquivos.stream()
                 .map(arq -> new FotoGaleriaResponseDTO(
                         arq.getId(),
                         arq.getUrl(),
-                        arq.getIsCapa() != null && arq.getIsCapa()
+                        arq.getIsCapa() != null && arq.getIsCapa(),
+                        arq.getDataCriacao()
                 ))
                 .collect(Collectors.toList());
 
@@ -107,7 +137,7 @@ public class AnimalService {
         AnimalEntidade animal = animalRepository.findById(animalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Animal não encontrado com o ID: " + animalId));
 
-        List<ArquivoSistemaEntidade> arquivos = arquivoSistemaRepository.findByAnimalIdOrderByDataCriacaoAsc(animalId);
+        List<ArquivoSistemaEntidade> arquivos = arquivoSistemaRepository.findByAnimalIdOrderByDataCriacaoAscIdAsc(animalId);
 
         animalBusiness.validarPertencimentoDoArquivo(arquivoId, arquivos);
 

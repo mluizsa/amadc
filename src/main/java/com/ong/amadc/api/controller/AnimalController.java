@@ -93,7 +93,6 @@ public class AnimalController {
     public ResponseEntity<Void> definirFotoComoCapa(
             @PathVariable Long id,
             @RequestBody Map<String, Long> payload) {
-
         Long arquivoId = payload.get("arquivoId");
         if (arquivoId == null) {
             return ResponseEntity.badRequest().build();

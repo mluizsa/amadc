@@ -22,11 +22,11 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity {
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "data_alteracao", nullable = false)
     private LocalDateTime dataAlteracao;
 
     @CreatedBy

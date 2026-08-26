@@ -44,9 +44,7 @@
             <div class="content text-center position-relative px-3" style="margin-top: -65px; padding-bottom: 25px;">
               <div class="author">
                     <a href="#">
-                      <!-- Adicione a imagem do animal aqui -->
                       <img v-if="animal.urlFotoCapa" class="avatar border-gray" :src="formatarUrlImagem(animal.urlFotoCapa)" :alt="animal.nome">
-                      <!-- Opcional: uma imagem placeholder se não houver foto principal -->
                       <img v-else class="avatar border-gray" :src="formatarUrlImagem('/uploads/img/placeholder-animal.png')" alt="Animal Placeholder">
                     </a>
                     <h4 class="title">{{ animal.nome }}</h4>
@@ -245,16 +243,25 @@
               </div>
 
               <div v-if="activeTab === 'galeria'" class="tab-pane-fade">
-                <h5 class="text-dark font-weight-bold mb-2 border-bottom pb-2">Linha do Tempo de Mídias</h5>
-                <p class="text-muted small mb-3">Imagens registadas em lote. Passe o rato sobre qualquer foto para defini-la como a capa oficial do pet.</p>
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                  <div>
+                    <h5 class="text-dark font-weight-bold m-0">Linha do Tempo de Mídias</h5>
+                    <p class="text-muted small mb-0">Imagens registadas em lote (Mais recentes primeiro). Clique para ampliar.</p>
+                  </div>
+                  <!-- Botão de Ação Rápida para adicionar fotos -->
+                  <button @click="$router.push(`/admin/animais/editar/${animal.id}`)" class="btn btn-outline-info btn-sm font-weight-bold shadow-sm">
+                    <i class="fa fa-plus mr-1"></i> Adicionar Fotos
+                  </button>
+                </div>
 
+                <!-- Usando .slice().reverse() para garantir ordem decrescente (do mais novo para o mais velho) -->
                 <div v-if="animal.fotosGaleria && animal.fotosGaleria.length > 0" class="row row-gap-3">
                   <div
-                    v-for="foto in animal.fotosGaleria"
+                    v-for="foto in [...animal.fotosGaleria].reverse()"
                     :key="foto.id"
                     class="col-12 col-sm-6 col-md-4 position-relative"
                   >
-                    <div class="card m-0 p-1 border shadow-sm rounded-lg overflow-hidden position-relative card-galeria-item">
+                    <div class="card m-0 p-1 border shadow-sm rounded-lg overflow-hidden position-relative card-galeria-item" @click="ampliarFoto(foto.url)" style="cursor: pointer;" title="Clique para ampliar">
 
                       <span
                         v-if="animal.urlFotoCapa === foto.url || foto.isCapa"
@@ -262,22 +269,33 @@
                       >
                         <i class="fa fa-star text-warning mr-1"></i> Foto de Capa
                       </span>
+                      <!-- Indicador da Data no Rodapé ou Canto da Foto -->
+                      <span
+                        v-if="foto.dataCriacao"
+                        class="badge badge-dark position-absolute badge-data-indicator shadow-sm"
+                      >
+                        <i class="fa fa-calendar mr-1"></i> {{ formatarData(foto.dataCriacao) }}
+                      </span>
 
                       <img :src="formatarUrlImagem(foto.url)" class="img-fluid rounded image-galeria-cover" alt="Evolução" crossorigin="anonymous">
 
-                      <div class="galeria-actions-overlay d-flex align-items-center justify-content-center">
+                      <div class="galeria-actions-overlay d-flex align-items-center justify-content-center" @click.stop>
                         <button
                           v-if="animal.urlFotoCapa !== foto.url && !foto.isCapa"
                           type="button"
                           @click="definirFotoComoCapa(foto)"
-                          class="btn btn-sm btn-info text-white font-weight-bold shadow-sm"
+                          class="btn btn-sm btn-info text-white font-weight-bold shadow-sm mr-2"
                           style="background-color: #23ccef; border: none;"
                         >
-                          <i class="fa fa-check-circle mr-1"></i> Usar como Capa
+                          <i class="fa fa-check-circle mr-1"></i> Capa
                         </button>
-                        <span v-else class="text-white font-weight-bold small bg-dark-translucent px-3 py-1 rounded">
-                          <i class="fa fa-star text-warning mr-1"></i> Capa Ativa
-                        </span>
+                        <button
+                          type="button"
+                          @click="ampliarFoto(foto.url)"
+                          class="btn btn-sm btn-secondary text-white font-weight-bold shadow-sm"
+                        >
+                          <i class="fa fa-search-plus"></i> Zoom
+                        </button>
                       </div>
 
                     </div>
@@ -287,7 +305,7 @@
                 <div v-else class="text-center p-5 bg-light rounded border text-muted">
                   <i class="fa fa-picture-o fa-3x mb-3 text-secondary"></i>
                   <h6 class="font-weight-bold mb-1">Nenhuma foto neste álbum</h6>
-                  <p class="mb-0 small">Edite a ficha clínica do animal na Etapa 4 para anexar o primeiro lote de imagens.</p>
+                  <p class="mb-0 small">Utilize o botão acima para anexar o primeiro lote de imagens do pet.</p>
                 </div>
               </div>
 
@@ -297,6 +315,17 @@
 
       </div>
     </div>
+
+    <!-- Modal Simples de Zoom/Lightbox para as fotos -->
+    <div v-if="modalZoomAtivo" class="modal-zoom-backdrop" @click="fecharZoom">
+      <div class="modal-zoom-content position-relative" @click.stop>
+        <button type="button" class="close-zoom-btn" @click="fecharZoom">
+          <i class="fa fa-times"></i>
+        </button>
+        <img :src="formatarUrlImagem(fotoZoomUrl)" class="img-fluid rounded shadow-lg" alt="Zoom Foto">
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -315,6 +344,8 @@ export default {
     return {
       loading: false,
       activeTab: 'historico', // Aba default inicial
+      modalZoomAtivo: false,
+      fotoZoomUrl: '',
       animal: {
         id: null,
         nome: '',
@@ -353,7 +384,6 @@ export default {
         const id = this.$route.params.id;
         const response = await axios.get(`/api/animais/${id}`);
         if (response.data) {
-          // 🎯 Garante reatividade inicial forçando um array se vier nulo do servidor
           this.animal = {
             ...response.data,
             fotosGaleria: response.data.fotosGaleria || []
@@ -383,15 +413,22 @@ export default {
         }
       } catch (error) {
         console.error("Erro ao definir foto de capa:", error);
-
-        // 🎯 Substituição do ?. por validação tradicional compatível com ES5/Babel antigo
         const msgErro = (error.response && error.response.data && error.response.data.message)
           || "Erro ao salvar alteração da capa no servidor.";
-
         alert(msgErro);
       }
     },
-    // 🎯 Método formatador adicionado para construir os caminhos absolutos das mídias
+
+    ampliarFoto(url) {
+      this.fotoZoomUrl = url;
+      this.modalZoomAtivo = true;
+    },
+
+    fecharZoom() {
+      this.modalZoomAtivo = false;
+      this.fotoZoomUrl = '';
+    },
+
     formatarUrlImagem(url) {
       if (!url) return '';
       if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -407,9 +444,12 @@ export default {
     formatarData(dataStr) {
       if (!dataStr) return 'Não cadastrada';
       try {
-        const partes = dataStr.split('T')[0].split('-');
+        // Pega apenas a parte antes do 'T' ou do espaço (ex: "2026-08-25T19:26:56" vira "2026-08-25")
+        const dataPura = dataStr.split('T')[0].split(' ')[0];
+        const partes = dataPura.split('-');
+        
         if (partes.length === 3) {
-          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+          return `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/AAAA
         }
         return dataStr;
       } catch (e) {
@@ -541,5 +581,39 @@ button.btn-outline-secondary:hover {
 }
 .bg-dark-translucent {
   background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Estilos do Modal de Zoom / Lightbox */
+.modal-zoom-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+.modal-zoom-content {
+  max-width: 90%;
+  max-height: 90vh;
+}
+.modal-zoom-content img {
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.close-zoom-btn {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
 }
 </style>
