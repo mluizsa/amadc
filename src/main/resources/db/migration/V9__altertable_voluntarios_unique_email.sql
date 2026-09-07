@@ -1,0 +1,1 @@
+ALTER TABLE voluntarios DROP CONSTRAINT IF EXISTS voluntarios_volu_email_key;

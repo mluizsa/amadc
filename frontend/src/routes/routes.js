@@ -3,10 +3,16 @@ import NotFound from '../pages/NotFoundPage.vue'
 import Login from '../pages/Login.vue'
 
 import Overview from 'src/pages/Overview.vue'
-import UserProfile from 'src/pages/UserProfile.vue'
-import TableList from 'src/pages/TableList.vue'
-import Notifications from 'src/pages/Notifications.vue'
-import VoluntarioForm from 'src/pages/VoluntarioForm.vue'
+import UserProfile from 'src/pages/UserProfile/UserProfile.vue'
+
+// Importações do Módulo de Voluntários
+import VoluntarioList from 'src/pages/Voluntarios/VoluntarioList.vue'
+import VoluntarioForm from 'src/pages/Voluntarios/VoluntarioForm.vue'
+
+// Importações do Módulo de Animais
+import AnimalList from 'src/pages/Animais/AnimalList.vue'
+import AnimalDetails from 'src/pages/Animais/AnimalDetails.vue'
+import AnimalForm from 'src/pages/Animais/AnimalForm.vue'
 
 const routes = [
   {
@@ -28,33 +34,83 @@ const routes = [
         path: 'overview',
         name: 'Painel',
         component: Overview,
-        meta: { 
+        meta: {
           icon: 'nc-icon nc-chart-pie-35',
-          hidden: false
+          hidden: false,
+          isHeader: true,
+          headerTitle: 'Início'
         }
       },
-      // --- CATEGORIA: GESTÃO OPERACIONAL ---
+      /* =========================================================================
+         MÓDULO DE ANIMAIS
+         ========================================================================= */
       {
         path: 'animais',
         name: 'Animais',
-        component: TableList, // Depois mudaremos para o componente específico de Animais
+        component: AnimalList,
         meta: {
           icon: 'fa fa-paw',
           permission: 'ANIMAL_READ',
-          category: 'Gestão Operacional',
-          hidden: false
+          hidden: false,
+          isHeader: true,
+          headerTitle: 'Animais'
         }
       },
-      // --- CATEGORIA: CONFIGURAÇÕES E RH ---
+      {
+        path: 'animais/novo',
+        name: 'Novo Animal',
+        component: AnimalForm,
+        meta: {
+          permission: 'ANIMAL_READ',
+          hidden: true
+        }
+      },
+      {
+        path: 'animais/editar/:id',
+        name: 'Editar Animal',
+        component: AnimalForm,
+        meta: {
+          permission: 'ANIMAL_READ',
+          hidden: true
+        }
+      },
+      {
+        path: 'animais/detalhes/:id',
+        name: 'Detalhes do Animal',
+        component: AnimalDetails,
+        meta: {
+          permission: 'ANIMAL_READ',
+          hidden: true
+        }
+      },
+      /* =========================================================================
+         MÓDULO FINANCEIRO
+         ========================================================================= */
+      {
+        path: 'financeiro',
+        name: 'Caixa / Custos',
+        component: Overview,
+        meta: {
+          icon: 'nc-icon nc-money-coins',
+          permission: 'FINANCE_WRITE',
+          hidden: false,
+          isHeader: true,
+          headerTitle: 'Gestão Financeira'
+        }
+      },
+      /* =========================================================================
+         MÓDULO DE VOLUNTÁRIOS (RH | GESTÃO)
+         ========================================================================= */
       {
         path: 'voluntarios',
         name: 'Voluntários',
-        component: TableList,
+        component: VoluntarioList,
         meta: {
           icon: 'nc-icon nc-badge',
-          permission: 'VOLUNTARIO_READ',
-          category: 'Configurações e RH',
-          hidden: false
+          permission: 'ADMIN',
+          hidden: false,
+          isHeader: true,
+          headerTitle: 'RH | Gestão'
         }
       },
       // --- ROTAS INTERNAS (ESCONDIDAS DO MENU) ---
@@ -62,18 +118,32 @@ const routes = [
         path: 'voluntarios/novo',
         name: 'Novo Voluntário',
         component: VoluntarioForm,
-        meta: {
-          permission: 'VOLUNTARIO_WRITE',
-          hidden: true
+        meta: { 
+          permission: 'ADMIN',
+          hidden: true 
         }
       },
       {
         path: 'voluntarios/editar/:id',
         name: 'Editar Voluntário',
         component: VoluntarioForm,
+        meta: { 
+          permission: 'ADMIN',
+          hidden: true 
+        }
+      },
+      /* =========================================================================
+         PERFIL DO USUÁRIO
+         ========================================================================= */
+      {
+        path: 'user',
+        name: 'Meu Perfil',
+        component: UserProfile,
         meta: {
-          permission: 'VOLUNTARIO_WRITE',
-          hidden: true
+          icon: 'fa fa-user',
+          hidden: false,
+          isHeader: true,
+          headerTitle: 'Configurações'
         }
       }
     ]

@@ -139,11 +139,13 @@ export default {
 
         // 2. Busca os dados do usuário (ID, Login, Permissões) do endpoint /api/auth/me
         const userData = await AuthService.getMe();
-        console.log("Dados do usuário e permissões recebidos:", userData.permissoes);
-        console.log("Objeto retornado pelo /me:", userData); // Veja a estrutura real aqui
-        const permissoesAtuais = userData.permissions || [] ;
+        console.log("Objeto retornado pelo /me:", userData);
+        
+        const permissoesAtuais = userData.permissions || [];
+        // 🌟 CORREÇÃO: Salva as permissões no localStorage para persistir entre as telas/recarregamentos
+        localStorage.setItem('user_permissions', JSON.stringify(permissoesAtuais));
+
         // 3. Atualiza o estado global do SidebarPlugin com as rotas permitidas
-        // Isso fará com que o menu "Voluntários" ou "Animais" apareça automaticamente
         this.$sidebar.setLinksFromRoutes(routes, permissoesAtuais);
 
         // 4. Navega para a área administrativa
@@ -152,7 +154,6 @@ export default {
       } catch (error) {
         console.error("Erro durante o fluxo de login:", error);
 
-        // Tratamento de erro amigável
         const mensagemErro = error.response && error.response.data
           ? error.response.data
           : "Credenciais inválidas ou servidor fora do ar.";

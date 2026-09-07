@@ -10,7 +10,6 @@ const SidebarStore = {
     const adminRoot = routes.find(r => r.path === '/admin');
     if (!adminRoot) return;
 
-    // Garante que é um array para não dar erro no .includes()
     const list = Array.isArray(userPermissions) ? userPermissions : [];
 
     this.sidebarLinks = adminRoot.children
@@ -24,9 +23,10 @@ const SidebarStore = {
       })
       .map(route => ({
         name: route.name,
+        icon: route.meta.icon || 'ti-view-list',
         path: `/admin/${route.path}`,
-        icon: route.meta && route.meta.icon ? route.meta.icon : '',
-        meta: route.meta // Garante o transporte do 'category' e 'hidden' para o componente Sidebar
+        isHeader: route.meta && route.meta.isHeader ? true : false,
+        headerTitle: route.meta && route.meta.headerTitle ? route.meta.headerTitle : ''
       }));
   },
   displaySidebar (value) {
