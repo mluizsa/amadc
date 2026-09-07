@@ -9,7 +9,12 @@ import java.util.List;
 @Repository
 public interface ArquivoSistemaRepository extends JpaRepository<ArquivoSistemaEntidade, Long> {
 
-    @Query("SELECT a FROM ArquivoSistemaEntidade a WHERE a.animal.id = :animalId ORDER BY a.dataCriacao ASC, a.id ASC")
+    @Query("SELECT a FROM ArquivoSistemaEntidade a WHERE a.animal.id = :animalId " +
+            " ORDER BY a.dataCriacao ASC, a.id ASC")
     List<ArquivoSistemaEntidade> findByAnimalIdOrderByDataCriacaoAscIdAsc(Long animalId);
+
+    @Query("SELECT a FROM ArquivoSistemaEntidade a WHERE a.voluntarioId = :voluntarioId " +
+            " ORDER BY a.dataCriacao ASC, a.id ASC")
+    List<ArquivoSistemaEntidade> findByVoluntarioIdOrderByDataCriacaoAscIdAsc(Long voluntarioId);
 
 }

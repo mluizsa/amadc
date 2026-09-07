@@ -1,5 +1,7 @@
 package com.ong.amadc.domain.service;
 
+import com.ong.amadc.domain.model.VoluntarioEntidade;
+import com.ong.amadc.domain.repository.VoluntarioRepository;
 import com.ong.amadc.domain.validator.ArquivoSistemaValidator;
 import com.ong.amadc.domain.business.ArquivoBusiness;
 import com.ong.amadc.domain.model.AnimalEntidade;
@@ -29,7 +31,8 @@ public class ArquivoSistemaService {
     private final TipoVinculoArquivoRepository tipoVinculoRepository;
     private final AnimalRepository animalRepository;
     private final ArquivoSistemaValidator validator;
-    private final ArquivoBusiness arquivoBusiness; // 👈 Injetado aqui
+    private final ArquivoBusiness arquivoBusiness;
+    private final VoluntarioRepository voluntarioRepository;
 
     @Value("${amadc.upload.diretorio:./uploads}")
     private String diretorioUpload;
@@ -72,5 +75,55 @@ public class ArquivoSistemaService {
         }
 
         return urlsProcessadas;
+    }
+
+
+    @Transactional
+    public List<String> armazenarArquivosVoluntario(Long voluntarioId, String tipoVinculoId, MultipartFile[] arquivos) {
+        if (arquivos == null || arquivos.length == 0) {
+            throw new IllegalArgumentException("Nenhum arquivo foi enviado.");
+        }
+
+        VoluntarioEntidade voluntario = voluntarioRepository.findById(voluntarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Voluntário não localizado."));
+
+        TipoVinculoArquivoEntidade tipoVinculo = tipoVinculoRepository.getReferenceById(tipoVinculoId);
+
+        List<String> urlsProcessadas = new ArrayList<>();
+
+        for (int i = 0; i < arquivos.length; i++) {
+            MultipartFile arquivo = arquivos[i];
+
+            validator.validarUploadPDF(arquivo, tipoVinculoId);
+
+            String nomeNormatizado = arquivoBusiness.extrairEGerarNomeNormatizado(
+                    arquivo, voluntario.getNome(), tipoVinculoId, i
+            );
+
+            arquivoBusiness.salvarArquivoNoDisco(arquivo, nomeNormatizado, this.diretorioUpload);
+
+            ArquivoSistemaEntidade arquivoEntidade = ArquivoSistemaEntidade.builder()
+                    .url("/uploads/voluntarios/" + nomeNormatizado)
+                    .nomeOriginal(arquivo.getOriginalFilename())
+                    .tipoVinculo(tipoVinculo)
+                    .animal(null)
+                    .atendimentoId(null)
+                    .voluntarioId(voluntario.getId())
+                    .build();
+
+            arquivoRepository.save(arquivoEntidade);
+            urlsProcessadas.add(arquivoEntidade.getUrl());
+        }
+
+        return urlsProcessadas;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArquivoSistemaEntidade> listarArquivosVoluntario(Long voluntarioId) {
+
+        if (!voluntarioRepository.existsById(voluntarioId)) {
+            throw new IllegalArgumentException("Voluntário não localizado.");
+        }
+        return arquivoRepository.findByVoluntarioIdOrderByDataCriacaoAscIdAsc(voluntarioId);
     }
 }

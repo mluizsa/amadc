@@ -1,5 +1,6 @@
 package com.ong.amadc.api.controller;
 
+import com.ong.amadc.domain.model.ArquivoSistemaEntidade;
 import com.ong.amadc.domain.service.ArquivoSistemaService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,28 @@ public class ArquivoSistemaController {
         List<String> urlResultante = arquivoSistemaService.armazenarFotosAnimal(animalId, tipoVinculo, fotos);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("urls", urlResultante));
+    }
+
+    @PostMapping(value = "/voluntario/{voluntarioId}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_WRITE')")
+    @Operation(summary = "Fazer upload de documentos/arquivos do voluntário",
+            description = "Recebe um lote (array) de arquivos para vincular ao voluntário")
+    public ResponseEntity<Map<String, List<String>>> uploadArquivosVoluntario(
+            @PathVariable Long voluntarioId,
+            @RequestParam("tipoVinculo") String tipoVinculo,
+            @RequestParam("arquivos") MultipartFile[] arquivos) {
+
+        List<String> urlResultante = arquivoSistemaService.armazenarArquivosVoluntario(voluntarioId, tipoVinculo, arquivos);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Collections.singletonMap("urls", urlResultante));
+    }
+
+    @GetMapping("/voluntario/{voluntarioId}")
+    @PreAuthorize("hasPermission(null, 'VOLUNTARIO_READ')")
+    @Operation(summary = "Listar arquivos do voluntário",
+            description = "Retorna todos os arquivos vinculados a um voluntário específico")
+    public ResponseEntity<List<ArquivoSistemaEntidade>> listarArquivosVoluntario(@PathVariable Long voluntarioId) {
+        List<ArquivoSistemaEntidade> arquivos = arquivoSistemaService.listarArquivosVoluntario(voluntarioId);
+        return ResponseEntity.ok(arquivos);
     }
 }

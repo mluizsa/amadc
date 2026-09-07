@@ -57,6 +57,7 @@
                   </div>
                 </div>
               </div>
+
               <!-- Seção de Perfis de Acesso (Visível principalmente na Edição) -->
               <div class="row" v-if="isEdit">
                 <div class="col-md-12">
@@ -82,6 +83,60 @@
                     <label>Observações</label>
                     <textarea rows="4" class="form-control" v-model="form.observacoes" placeholder="Informações adicionais relevantes sobre o voluntário..."></textarea>
                   </div>
+                </div>
+              </div>
+
+              <!-- SEÇÃO DE DOCUMENTOS / ANEXOS (Visível apenas na Edição) -->
+              <div v-if="isEdit" class="mt-4">
+                <h5 class="access-title"><i class="fa fa-folder-open"></i> Documentos e Termos Vinculados</h5>
+                
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label>Selecione os arquivos (Imagens ou PDF):</label>
+                      <div class="input-group">
+                        <input type="file" class="form-control" multiple accept="image/*,application/pdf" @change="onFilesSelected">
+                        <div class="input-group-append" v-if="arquivosSelecionados.length > 0">
+                          <button class="btn btn-info" type="button" @click="fazerUploadArquivos" :disabled="enviandoArquivos">
+                            <i v-if="enviandoArquivos" class="fa fa-spinner fa-spin"></i>
+                            {{ enviandoArquivos ? 'Enviando...' : `Enviar (${arquivosSelecionados.length})` }}
+                          </button>
+                        </div>
+                      </div>
+                      <small class="form-text text-muted">Você pode enviar termos assinados, fichas ou documentos de identificação.</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lista de Arquivos já cadastrados -->
+                <div class="row mt-2" v-if="listaArquivos.length > 0">
+                  <div class="col-md-12">
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered bg-white">
+                        <thead>
+                          <tr>
+                            <th>Nome do Arquivo</th>
+                            <th>Data</th>
+                            <th class="text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="arq in listaArquivos" :key="arq.id">
+                            <td><a :href="arq.url" target="_blank" class="text-info"><i class="fa fa-file-o mr-1"></i> {{ arq.nomeOriginal || 'Documento' }}</a></td>
+                            <td>{{ formatarDataHora(arq.dataCriacao) }}</td>
+                            <td class="text-center">
+                              <a :href="arq.url" target="_blank" class="btn btn-sm btn-info btn-link" title="Visualizar/Baixar">
+                                <i class="fa fa-external-link"></i>
+                              </a>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="text-muted small font-italic mt-2">
+                  Nenhum documento anexado a este voluntário até o momento.
                 </div>
               </div>
 
@@ -169,7 +224,10 @@ export default {
     return {
       saving: false,
       isEdit: false,
-      listaPerfis: [], 
+      listaPerfis: [],
+      arquivosSelecionados: [],
+      enviandoArquivos: false,
+      listaArquivos: [],
       form: {
         id: null,
         nome: '',
@@ -188,6 +246,70 @@ export default {
     }
   },
   methods: {
+    onFilesSelected(event) {
+      this.arquivosSelecionados = event.target.files;
+    },
+
+    async carregarArquivosVoluntario(id) {
+      try {
+        const response = await axios.get(`/api/arquivos/voluntario/${id}`);
+        this.listaArquivos = response.data;
+      } catch (error) {
+        console.error("Erro ao carregar arquivos do voluntário:", error);
+      }
+    },
+
+    async fazerUploadArquivos() {
+      if (!this.arquivosSelecionados || this.arquivosSelecionados.length === 0) return;
+
+      this.enviandoArquivos = true;
+      const formData = new FormData();
+      formData.append('tipoVinculo', 'VOLUNTARIO'); 
+
+      for (let i = 0; i < this.arquivosSelecionados.length; i++) {
+        formData.append('arquivos', this.arquivosSelecionados[i]);
+      }
+
+      try {
+        await axios.post(`/api/arquivos/voluntario/${this.form.id}/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        this.$notifications.notify({
+          message: '<span><b>Sucesso!</b> Arquivos enviados com sucesso.</span>',
+          icon: 'fa fa-check-circle',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'success'
+        });
+
+        this.arquivosSelecionados = [];
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = '';
+
+        await this.carregarArquivosVoluntario(this.form.id);
+      } catch (error) {
+        console.error("Erro no upload:", error);
+        this.$notifications.notify({
+          message: '<span><b>Erro</b> Falha ao enviar os arquivos. Verifique o tamanho ou formato.</span>',
+          icon: 'fa fa-exclamation-triangle',
+          horizontalAlign: 'right',
+          verticalAlign: 'top',
+          type: 'danger'
+        });
+      } finally {
+        this.enviandoArquivos = false;
+      }
+    },
+
+    formatarDataHora(dataIso) {
+      if (!dataIso) return '';
+      const data = new Date(dataIso);
+      return data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    },
+    
     async carregarPerfis() {
       try {
         const response = await axios.get('/api/perfis');
@@ -224,7 +346,9 @@ export default {
           this.form.perfilIds = [];
         }
 
-        console.log("Dados do voluntário carregados:", this.form);
+        // CORREÇÃO: Chamava carregarVoluntario em loop infinito. Agora chama a listagem de arquivos correta:
+        await this.carregarArquivosVoluntario(this.form.id);
+        
       } catch (error) {
         console.error("Erro ao carregar dados do voluntário:", error);
         let errorMsg = 'Não foi possível recuperar os dados do voluntário.';
@@ -262,12 +386,13 @@ export default {
           payload.perfilIds = [];
         }
 
+        let acaoTexto = '';
         if (this.isEdit) {
           await axios.put(`/api/voluntarios/${this.form.id}`, payload);
-          var acaoTexto = 'atualizado';
+          acaoTexto = 'atualizado';
         } else {
           await axios.post('/api/voluntarios', payload);
-          var acaoTexto = 'cadastrado';
+          acaoTexto = 'cadastrado';
         }
 
         this.$notifications.notify({
@@ -333,171 +458,34 @@ export default {
 </script>
 
 <style scoped>
-.btn-fill {
-  border-radius: 4px;
-  font-weight: 600;
-}
-.form-control {
-  background-color: #FFFFFF;
-  border: 1px solid #E3E3E3;
-  border-radius: 4px;
-  color: #565656;
-  padding: 8px 12px;
-  height: auto;
-}
-textarea.form-control {
-  height: auto !important;
-}
-
-.audit-divider {
-  margin: 30px 0 20px 0;
-  border-top: 1px dashed #e3e3e3;
-}
-.access-toggle-container {
-  display: flex;
-  align-items: center;
-  background: #f9f9f9;
-  padding: 12px 15px;
-  border-radius: 6px;
-  border: 1px solid #f0f0f0;
-}
-.access-text {
-  margin-left: 12px;
-  color: #444;
-  font-size: 14px;
-}
-.access-box {
-  background-color: #f4f7f6;
-  border-left: 4px solid #1dc7ea;
-  padding: 20px;
-  border-radius: 0 6px 6px 0;
-  margin-top: 15px;
-}
-.access-title {
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 15px;
-  color: #333;
-  font-weight: 600;
-}
-.access-title i {
-  color: #1dc7ea;
-  margin-right: 5px;
-}
-
-.perfis-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-  margin-top: 8px;
-}
-.perfil-checkbox-item {
-  background: #ffffff;
-  padding: 8px 12px;
-  border-radius: 4px;
-  border: 1px solid #e3e3e3;
-}
-
-.switch-label {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 22px;
-  margin-bottom: 0;
-  vertical-align: middle;
-}
-.custom-switch {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.switch-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .3s;
-  border-radius: 22px;
-}
-.switch-slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-}
-.custom-switch:checked + .switch-slider {
-  background-color: #1dc7ea;
-}
-.custom-switch:checked + .switch-slider:before {
-  transform: translateX(22px);
-}
-
-.checkbox-container {
-  display: block;
-  position: relative;
-  padding-left: 28px;
-  margin-bottom: 0;
-  cursor: pointer;
-  font-size: 13px;
-  user-select: none;
-}
-.checkbox-container input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0; width: 0;
-}
-.checkmark {
-  position: absolute;
-  top: 1px;
-  left: 0;
-  height: 18px;
-  width: 18px;
-  background-color: #eee;
-  border-radius: 3px;
-}
-.checkbox-container:hover input ~ .checkmark {
-  background-color: #ccc;
-}
-.checkbox-container input:checked ~ .checkmark {
-  background-color: #1dc7ea;
-}
-.checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-}
-.checkbox-container input:checked ~ .checkmark:after {
-  display: block;
-}
-.checkbox-container .checkmark:after {
-  left: 6px;
-  top: 3px;
-  width: 5px;
-  height: 9px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-.perfil-name {
-  color: #565656;
-  font-weight: 500;
-}
-
-.animated {
-  animation-duration: 0.4s;
-  animation-fill-mode: both;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fadeIn {
-  animation-name: fadeIn;
-}
+/* Estilos mantidos iguais */
+.btn-fill { border-radius: 4px; font-weight: 600; }
+.form-control { background-color: #FFFFFF; border: 1px solid #E3E3E3; border-radius: 4px; color: #565656; padding: 8px 12px; height: auto; }
+textarea.form-control { height: auto !important; }
+.audit-divider { margin: 30px 0 20px 0; border-top: 1px dashed #e3e3e3; }
+.access-toggle-container { display: flex; align-items: center; background: #f9f9f9; padding: 12px 15px; border-radius: 6px; border: 1px solid #f0f0f0; }
+.access-text { margin-left: 12px; color: #444; font-size: 14px; }
+.access-box { background-color: #f4f7f6; border-left: 4px solid #1dc7ea; padding: 20px; border-radius: 0 6px 6px 0; margin-top: 15px; }
+.access-title { margin-top: 0; margin-bottom: 15px; font-size: 15px; color: #333; font-weight: 600; }
+.access-title i { color: #1dc7ea; margin-right: 5px; }
+.perfis-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 8px; }
+.perfil-checkbox-item { background: #ffffff; padding: 8px 12px; border-radius: 4px; border: 1px solid #e3e3e3; }
+.switch-label { position: relative; display: inline-block; width: 44px; height: 22px; margin-bottom: 0; vertical-align: middle; }
+.custom-switch { opacity: 0; width: 0; height: 0; }
+.switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 22px; }
+.switch-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+.custom-switch:checked + .switch-slider { background-color: #1dc7ea; }
+.custom-switch:checked + .switch-slider:before { transform: translateX(22px); }
+.checkbox-container { display: block; position: relative; padding-left: 28px; margin-bottom: 0; cursor: pointer; font-size: 13px; user-select: none; }
+.checkbox-container input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+.checkmark { position: absolute; top: 1px; left: 0; height: 18px; width: 18px; background-color: #eee; border-radius: 3px; }
+.checkbox-container:hover input ~ .checkmark { background-color: #ccc; }
+.checkbox-container input:checked ~ .checkmark { background-color: #1dc7ea; }
+.checkmark:after { content: ""; position: absolute; display: none; }
+.checkbox-container input:checked ~ .checkmark:after { display: block; }
+.checkbox-container .checkmark:after { left: 6px; top: 3px; width: 5px; height: 9px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.perfil-name { color: #565656; font-weight: 500; }
+.animated { animation-duration: 0.4s; animation-fill-mode: both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.fadeIn { animation-name: fadeIn; }
 </style>

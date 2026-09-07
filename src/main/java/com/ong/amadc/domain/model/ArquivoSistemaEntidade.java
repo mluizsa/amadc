@@ -27,7 +27,7 @@ public class ArquivoSistemaEntidade extends BaseEntity {
     @Column(name = "arq_nome_original")
     private String nomeOriginal;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tva_id", nullable = false)
     private TipoVinculoArquivoEntidade tipoVinculo;
 

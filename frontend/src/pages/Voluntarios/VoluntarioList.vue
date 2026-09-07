@@ -35,6 +35,7 @@
                       E-MAIL
                       <i class="fa" :class="sortKey === 'email' ? (sortOrder === 'asc' ? 'fa-sort-alpha-asc' : 'fa-sort-alpha-desc') : 'fa-sort text-muted'"></i>
                     </th>
+                    <th class="cell-files text-center">ARQUIVOS</th>
                     <th class="cell-status text-center sortable" @click="sortBy('ativo')">
                       STATUS
                       <i class="fa" :class="sortKey === 'ativo' ? (sortOrder === 'asc' ? 'fa-sort-amount-asc' : 'fa-sort-amount-desc') : 'fa-sort text-muted'"></i>
@@ -57,6 +58,11 @@
                         <div class="cell-data cell-name"><b>{{ item.nome }}</b></div>
                         <div class="cell-data cell-phone">{{ item.telefone || 'Não informado' }}</div>
                         <div class="cell-data cell-email">{{ item.email }}</div>
+                        <div class="cell-data cell-files text-center">
+                          <span class="badge badge-secondary" :title="item.totalArquivos ? item.totalArquivos + ' arquivo(s) anexado(s)' : 'Nenhum arquivo'">
+                            <i class="fa fa-paperclip mr-1"></i> {{ item.totalArquivos || 0 }}
+                          </span>
+                        </div>
                         <div class="cell-data cell-status text-center">
                           <span :class="item.ativo ? 'badge badge-success' : 'badge badge-danger'">
                             {{ item.ativo ? 'Ativo' : 'Inativo' }}
@@ -215,7 +221,28 @@ export default {
       this.loading = true;
       try {
         const response = await axios.get(`/api/voluntarios`);
-        this.tableData.data = response.data;
+        const voluntarios = response.data;
+
+        // Busca a quantidade de arquivos para cada voluntário em paralelo para atualizar a listagem
+        const voluntariosComArquivos = await Promise.all(
+          voluntarios.map(async (vol) => {
+            try {
+              const resArq = await axios.get(`/api/arquivos/voluntario/${vol.id}`);
+              const arquivos = resArq.data;
+              return {
+                ...vol,
+                totalArquivos: Array.isArray(arquivos) ? arquivos.length : 0
+              };
+            } catch (err) {
+              return {
+                ...vol,
+                totalArquivos: 0
+              };
+            }
+          })
+        );
+
+        this.tableData.data = voluntariosComArquivos;
       } catch (error) {
         console.error("Erro ao carregar dados", error);
       } finally {
@@ -381,12 +408,13 @@ th.sortable i {
   overflow: hidden;
 }
 
-.cell-arrow    { flex: 0 0 5%;  width: 5%;  min-width: 45px; }
-.cell-name     { flex: 0 0 25%; width: 25%; }
-.cell-phone    { flex: 0 0 20%; width: 20%; }
-.cell-email    { flex: 0 0 30%; width: 30%; }
-.cell-status   { flex: 0 0 10%; width: 10%; text-align: center; }
-.cell-actions  { flex: 0 0 10%; width: 10%; text-align: center; }
+.cell-arrow   { flex: 0 0 5%;  width: 5%;  min-width: 45px; }
+.cell-name    { flex: 0 0 23%; width: 23%; }
+.cell-phone   { flex: 0 0 18%; width: 18%; }
+.cell-email   { flex: 0 0 27%; width: 27%; }
+.cell-files   { flex: 0 0 10%; width: 10%; text-align: center; }
+.cell-status  { flex: 0 0 9%;  width: 9%;  text-align: center; }
+.cell-actions { flex: 0 0 8%;  width: 8%;  text-align: center; }
 
 .full-width-dropdown {
   flex: 0 0 100% !important;
@@ -481,10 +509,11 @@ th.sortable i {
     display: none !important;
   }
 
-  .cell-name  { flex: 0 0 35%; width: 35%; }
-  .cell-email { flex: 0 0 35%; width: 35%; }
-  .cell-status{ flex: 0 0 15%; width: 15%; }
-  .cell-actions{ flex: 0 0 15%; width: 15%; min-width: 70px; }
+  .cell-name   { flex: 0 0 30%; width: 30%; }
+  .cell-email  { flex: 0 0 30%; width: 30%; }
+  .cell-files  { flex: 0 0 15%; width: 15%; }
+  .cell-status { flex: 0 0 12%; width: 12%; }
+  .cell-actions{ flex: 0 0 13%; width: 13%; min-width: 70px; }
 
   .info-box { margin-bottom: 20px; }
 }
