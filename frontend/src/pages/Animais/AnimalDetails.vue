@@ -35,6 +35,7 @@
 
       <div v-else class="row">
 
+        <!-- Coluna Esquerda: Perfil do Animal -->
         <div class="col-12 col-lg-4 mb-4">
           <div class="card card-user border-0 shadow-sm bg-white" style="border-radius: 8px; overflow: hidden;">
             <div class="image-cover-header position-relative">
@@ -43,11 +44,11 @@
 
             <div class="content text-center position-relative px-3" style="margin-top: -65px; padding-bottom: 25px;">
               <div class="author">
-                    <a href="#">
-                      <img v-if="animal.urlFotoCapa" class="avatar border-gray" :src="formatarUrlImagem(animal.urlFotoCapa)" :alt="animal.nome">
-                      <img v-else class="avatar border-gray" :src="formatarUrlImagem('/uploads/img/placeholder-animal.png')" alt="Animal Placeholder">
-                    </a>
-                    <h4 class="title">{{ animal.nome }}</h4>
+                <a href="#">
+                  <img v-if="animal.urlFotoCapa" class="avatar border-gray" :src="formatarUrlImagem(animal.urlFotoCapa)" :alt="animal.nome">
+                  <img v-else class="avatar border-gray" :src="formatarUrlImagem('/uploads/img/placeholder-animal.png')" alt="Animal Placeholder">
+                </a>
+                <h4 class="title">{{ animal.nome }}</h4>
                 <p class="text-muted small font-weight-600 mb-3" style="letter-spacing: 0.3px;">
                   RACA: {{ animal.raca || 'N/I' }} | PORTE: {{ animal.porte || 'N/I' }}
                 </p>
@@ -84,6 +85,7 @@
           </div>
         </div>
 
+        <!-- Coluna Direita: Abas de Conteúdo -->
         <div class="col-12 col-lg-8 mb-4">
           <div class="card border-0 shadow-sm bg-white" style="border-radius: 8px; min-height: 485px;">
             <div class="card-header bg-white pb-0 border-0 pt-3 px-3">
@@ -96,6 +98,11 @@
                 <li class="nav-item">
                   <a class="nav-link" :class="{ 'active': activeTab === 'clinica' }" @click="activeTab = 'clinica'">
                     <i class="fa fa-file-text-o mr-1"></i> Ficha Clínica
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" :class="{ 'active': activeTab === 'atendimentos' }" @click="activeTab = 'atendimentos'">
+                    <i class="fa fa-stethoscope mr-1"></i> Atendimentos
                   </a>
                 </li>
                 <li class="nav-item">
@@ -118,6 +125,7 @@
 
             <div class="card-body p-4 tab-content">
 
+              <!-- Aba Histórico -->
               <div v-if="activeTab === 'historico'" class="tab-pane-fade">
                 <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2">Biografia & Origem</h5>
                 <p class="text-dark font-weight-500 bg-light p-3 rounded border text-justify style-biografia-text" v-if="animal.historia">
@@ -166,6 +174,7 @@
                 </div>
               </div>
 
+              <!-- Aba Ficha Clínica -->
               <div v-if="activeTab === 'clinica'" class="tab-pane-fade">
                 <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2">Status Clínico de Entrada</h5>
                 <div class="row">
@@ -183,7 +192,7 @@
                   </div>
                 </div>
 
-                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2 mt-4">Controlo reprodutivo</h5>
+                <h5 class="text-dark font-weight-bold mb-3 border-bottom pb-2 mt-4">Controle reprodutivo</h5>
                 <div class="row">
                   <div class="col-12 mb-2">
                     <div class="p-3 rounded border d-flex align-items-center" :class="animal.castrado ? 'bg-success-light border-success-200' : 'bg-warning-light border-warning-200'">
@@ -222,6 +231,12 @@
                 </div>
               </div>
 
+              <!-- Aba Atendimentos (Integração do Componente Novo) -->
+              <div v-if="activeTab === 'atendimentos'" class="tab-pane-fade">
+                <AtendimentosTab :animalId="animal.id" v-if="animal.id" />
+              </div>
+
+              <!-- Aba Vacinas -->
               <div v-if="activeTab === 'vacinas'" class="tab-pane-fade">
                 <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                   <h5 class="text-dark font-weight-bold m-0">Esquema Vacinal</h5>
@@ -232,6 +247,7 @@
                 </p>
               </div>
 
+              <!-- Aba Medicamentos -->
               <div v-if="activeTab === 'medicamentos'" class="tab-pane-fade">
                 <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                   <h5 class="text-dark font-weight-bold m-0">Prescrições Ativas & Tratamentos</h5>
@@ -242,19 +258,18 @@
                 </p>
               </div>
 
+              <!-- Aba Galeria -->
               <div v-if="activeTab === 'galeria'" class="tab-pane-fade">
                 <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                   <div>
                     <h5 class="text-dark font-weight-bold m-0">Linha do Tempo de Mídias</h5>
                     <p class="text-muted small mb-0">Imagens registadas em lote (Mais recentes primeiro). Clique para ampliar.</p>
                   </div>
-                  <!-- Botão de Ação Rápida para adicionar fotos -->
                   <button @click="$router.push(`/admin/animais/editar/${animal.id}`)" class="btn btn-outline-info btn-sm font-weight-bold shadow-sm">
                     <i class="fa fa-plus mr-1"></i> Adicionar Fotos
                   </button>
                 </div>
 
-                <!-- Usando .slice().reverse() para garantir ordem decrescente (do mais novo para o mais velho) -->
                 <div v-if="animal.fotosGaleria && animal.fotosGaleria.length > 0" class="row row-gap-3">
                   <div
                     v-for="foto in [...animal.fotosGaleria].reverse()"
@@ -269,7 +284,6 @@
                       >
                         <i class="fa fa-star text-warning mr-1"></i> Foto de Capa
                       </span>
-                      <!-- Indicador da Data no Rodapé ou Canto da Foto -->
                       <span
                         v-if="foto.dataCriacao"
                         class="badge badge-dark position-absolute badge-data-indicator shadow-sm"
@@ -331,9 +345,13 @@
 
 <script>
 import axios from 'axios'
+import AtendimentosTab from './AtendimentosTab.vue'
 
 export default {
   name: 'AnimalDetails',
+  components: {
+    AtendimentosTab
+  },
   filters: {
     removerUnderline(valor) {
       if (!valor) return '';
@@ -343,7 +361,7 @@ export default {
   data() {
     return {
       loading: false,
-      activeTab: 'historico', // Aba default inicial
+      activeTab: 'historico',
       modalZoomAtivo: false,
       fotoZoomUrl: '',
       animal: {
@@ -444,12 +462,11 @@ export default {
     formatarData(dataStr) {
       if (!dataStr) return 'Não cadastrada';
       try {
-        // Pega apenas a parte antes do 'T' ou do espaço (ex: "2026-08-25T19:26:56" vira "2026-08-25")
         const dataPura = dataStr.split('T')[0].split(' ')[0];
         const partes = dataPura.split('-');
         
         if (partes.length === 3) {
-          return `${partes[2]}/${partes[1]}/${partes[0]}`; // Formato DD/MM/AAAA
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
         }
         return dataStr;
       } catch (e) {
@@ -583,7 +600,6 @@ button.btn-outline-secondary:hover {
   background-color: rgba(0, 0, 0, 0.6);
 }
 
-/* Estilos do Modal de Zoom / Lightbox */
 .modal-zoom-backdrop {
   position: fixed;
   top: 0;
